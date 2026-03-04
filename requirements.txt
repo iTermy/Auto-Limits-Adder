@@ -1,0 +1,6 @@
+# Auto-Execution Bot — Python dependencies
+# Windows only (MetaTrader5 package)
+
+asyncpg>=0.29.0
+python-dotenv>=1.0.0
+MetaTrader5>=5.0.45   # Windows only

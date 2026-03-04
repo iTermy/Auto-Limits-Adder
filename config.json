@@ -1,0 +1,59 @@
+{
+  "poll_interval_seconds": 5,
+
+  "filters": {
+    "instruments": {
+      "mode": "all",
+      "list": ["XAUUSD"]
+    },
+    "asset_classes": {
+      "mode": "all",
+      "list": ["metals", "forex"]
+    },
+    "directions": "both",
+    "scalp_signals": true,
+    "signal_types": "all"
+  },
+
+  "execution": {
+    "risk_percent": 5.0,
+    "min_lot": 0.01,
+    "skip_if_price_past_limit": true,
+    "place_all_limits_simultaneously": true
+  },
+
+  "tp": {
+    "profit_threshold_pips": {
+      "default": 7,
+      "per_instrument": {
+        "XAUUSD": 15
+      }
+    },
+    "breakeven_buffer_pips": {
+      "default": 2,
+      "per_instrument": {}
+    },
+    "partial_close_percent": 50,
+    "trail_pips": {
+      "default": 3,
+      "per_instrument": {
+        "XAUUSD": 8
+      }
+    }
+  },
+
+  "symbol_map": {
+    "XAUUSD": "XAUUSD",
+    "XAGUSD": "XAGUSD",
+    "GOLD": "XAUUSD",
+    "SILVER": "XAGUSD",
+    "EURUSD": "EURUSD",
+    "GBPUSD": "GBPUSD",
+    "USDJPY": "USDJPY",
+    "GBPJPY": "GBPJPY",
+    "nas100usd": "NAS100",
+    "nas100": "NAS100",
+    "spx500usd": "SP500",
+    "spx500": "SP500"
+  }
+}
