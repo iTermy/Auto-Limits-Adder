@@ -522,6 +522,50 @@ class SyncEngine:
                 local_db.mark_cancelled(ticket)
 
         # ------------------------------------------------------------------
+        # Cancel + re-place pending orders whose stop_loss has changed in DB
+        #
+        # The Limits-Alert-Bot may update price_level and stop_loss as
+        # separate DB writes.  If _sync_orders runs between those two writes
+        # it places the new order with a stale SL.  Since pending orders have
+        # their SL baked in at placement time and are never modified in-place,
+        # we detect the drift here and cancel so the order is re-placed fresh
+        # on the very next cycle (limit_id will no longer be in local_by_limit
+        # as 'pending', so the "place missing orders" block above will fire).
+        # ------------------------------------------------------------------
+        for limit_id, mapping in local_by_limit.items():
+            if limit_id not in db_pending:
+                continue  # Already handled by the cancel block above
+
+            stored_db_sl = mapping.get("db_stop_loss")
+            if stored_db_sl is None:
+                continue  # No baseline recorded — can't detect drift
+
+            signal = db_signals.get(mapping["signal_id"])
+            if signal is None:
+                continue
+
+            current_db_sl = signal["stop_loss"]
+            instrument    = signal["instrument"]
+            symbol        = map_instrument_to_symbol(instrument, self.symbol_map)
+
+            # Use one pip as the tolerance to avoid floating-point false positives
+            pip_size = mt5_api.pips_to_price(1.0, symbol)
+            if pip_size <= 0:
+                pip_size = 0.00001
+
+            if abs(current_db_sl - stored_db_sl) < pip_size:
+                continue  # SL unchanged — nothing to do
+
+            ticket = mapping["mt5_ticket"]
+            logger.info(
+                f"SL change detected on pending order: limit_id={limit_id}, "
+                f"ticket={ticket} ({symbol}): stored_db_sl={stored_db_sl:.5f} → "
+                f"current_db_sl={current_db_sl:.5f} — cancelling for re-placement."
+            )
+            mt5_api.cancel_pending_order(ticket)
+            local_db.mark_cancelled(ticket)
+
+        # ------------------------------------------------------------------
         # Clean up deferred limits for limits no longer in DB
         # ------------------------------------------------------------------
         for limit_id in list(deferred_limit_ids):
