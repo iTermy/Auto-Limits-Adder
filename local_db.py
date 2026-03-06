@@ -33,16 +33,21 @@ DB_PATH = "orders.db"
 
 DDL = """
 CREATE TABLE IF NOT EXISTS order_mappings (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    limit_id     BIGINT NOT NULL UNIQUE,
-    signal_id    BIGINT NOT NULL,
-    mt5_ticket   BIGINT NOT NULL UNIQUE,
-    order_type   TEXT NOT NULL,
-    lot_size     REAL,
-    placed_at    TEXT NOT NULL,
-    filled_at    TEXT,
-    cancelled_at TEXT,
-    status       TEXT NOT NULL DEFAULT 'pending'
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    limit_id          BIGINT NOT NULL UNIQUE,
+    signal_id         BIGINT NOT NULL,
+    mt5_ticket        BIGINT NOT NULL UNIQUE,
+    order_type        TEXT NOT NULL,
+    lot_size          REAL,
+    placed_at         TEXT NOT NULL,
+    filled_at         TEXT,
+    cancelled_at      TEXT,
+    status            TEXT NOT NULL DEFAULT 'pending',
+    -- Offset-order tracking (indices / crypto only)
+    feed_price_at_placement  REAL,   -- OANDA/Binance mid price when order was placed
+    mt5_price_at_placement   REAL,   -- MT5 mid price when order was placed
+    offset_at_placement      REAL,   -- mt5 - feed at placement time
+    last_offset_check        TEXT    -- ISO timestamp of last offset readjustment check
 );
 
 CREATE INDEX IF NOT EXISTS idx_om_signal_id ON order_mappings(signal_id);
@@ -97,13 +102,19 @@ def insert_order_mapping(
     Returns the new row id.
     """
     sql = """
-        INSERT INTO order_mappings
+        INSERT OR IGNORE INTO order_mappings
             (limit_id, signal_id, mt5_ticket, order_type, lot_size, placed_at, status)
         VALUES (?, ?, ?, ?, ?, ?, 'pending')
     """
     with get_connection(db_path) as conn:
         cur = conn.execute(sql, (limit_id, signal_id, mt5_ticket, order_type, lot_size, _now_iso()))
         conn.commit()
+        if cur.rowcount == 0:
+            # Duplicate — row already existed. Log and return existing id.
+            existing = conn.execute(
+                "SELECT id FROM order_mappings WHERE limit_id = ?", (limit_id,)
+            ).fetchone()
+            return existing["id"] if existing else -1
         return cur.lastrowid
 
 
@@ -148,11 +159,21 @@ def get_filled_mappings_by_signal_id(signal_id: int, db_path: str = DB_PATH) -> 
 
 
 def get_all_tracked_signal_ids(db_path: str = DB_PATH) -> set[int]:
-    """Return all distinct signal_ids we have any mapping for."""
+    """Return all distinct signal_ids we have any mapping for (any status)."""
     sql = "SELECT DISTINCT signal_id FROM order_mappings"
     with get_connection(db_path) as conn:
         rows = conn.execute(sql).fetchall()
     return {r["signal_id"] for r in rows}
+
+
+def get_all_tracked_limit_ids(db_path: str = DB_PATH) -> set[int]:
+    """Return all distinct limit_ids we have any mapping for (any status).
+    Used to prevent re-placing an order when the local DB write failed mid-cycle.
+    """
+    sql = "SELECT DISTINCT limit_id FROM order_mappings"
+    with get_connection(db_path) as conn:
+        rows = conn.execute(sql).fetchall()
+    return {r["limit_id"] for r in rows}
 
 
 # ---------------------------------------------------------------------------
@@ -220,3 +241,53 @@ def cancel_all_pending_for_signal(signal_id: int, db_path: str = DB_PATH) -> lis
         conn.execute(sql_update, (_now_iso(), signal_id))
         conn.commit()
     return tickets
+
+
+# ---------------------------------------------------------------------------
+# Offset-order helpers (indices / crypto)
+# ---------------------------------------------------------------------------
+
+def update_offset_metadata(
+    mt5_ticket: int,
+    feed_price: float,
+    mt5_price: float,
+    db_path: str = DB_PATH,
+) -> None:
+    """
+    Store the feed/MT5 prices at placement time and record the check timestamp.
+    Called immediately after placing an offset-adjusted order.
+    """
+    offset = mt5_price - feed_price
+    sql = """
+        UPDATE order_mappings
+        SET feed_price_at_placement = ?,
+            mt5_price_at_placement  = ?,
+            offset_at_placement     = ?,
+            last_offset_check       = ?
+        WHERE mt5_ticket = ?
+    """
+    with get_connection(db_path) as conn:
+        conn.execute(sql, (feed_price, mt5_price, offset, _now_iso(), mt5_ticket))
+        conn.commit()
+
+
+def update_last_offset_check(mt5_ticket: int, db_path: str = DB_PATH) -> None:
+    """Record that we checked (and did not need to readjust) an offset order."""
+    sql = "UPDATE order_mappings SET last_offset_check = ? WHERE mt5_ticket = ?"
+    with get_connection(db_path) as conn:
+        conn.execute(sql, (_now_iso(), mt5_ticket))
+        conn.commit()
+
+
+def get_pending_offset_mappings(db_path: str = DB_PATH) -> list[dict]:
+    """
+    Return pending mappings that have offset metadata — i.e. index/crypto orders
+    that may need periodic readjustment.
+    """
+    sql = """
+        SELECT * FROM order_mappings
+        WHERE status = 'pending' AND offset_at_placement IS NOT NULL
+    """
+    with get_connection(db_path) as conn:
+        rows = conn.execute(sql).fetchall()
+    return [_row_to_dict(r) for r in rows]

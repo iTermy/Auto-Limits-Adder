@@ -196,3 +196,44 @@ async def fetch_active_signals_with_pending_limits(pool: asyncpg.Pool) -> list[d
         sig["pending_limits"] = limits_by_signal.get(sig["id"], [])
 
     return signals
+
+
+# ---------------------------------------------------------------------------
+# Live prices (OANDA / Binance feed — written by Limits-Alert-Bot)
+# ---------------------------------------------------------------------------
+
+async def fetch_live_price(pool: asyncpg.Pool, symbol: str) -> dict | None:
+    """
+    Fetch the latest feed price for a symbol from the live_prices table.
+    Returns a dict with keys: symbol, bid, ask, feed, updated_at
+    Returns None if no row exists for the symbol.
+
+    The caller is responsible for checking staleness via updated_at.
+    """
+    query = """
+        SELECT symbol, bid, ask, feed, updated_at
+        FROM live_prices
+        WHERE symbol = $1
+    """
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(query, symbol)
+    return _record_to_dict(row) if row else None
+
+
+async def fetch_live_prices_bulk(
+    pool: asyncpg.Pool, symbols: list[str]
+) -> dict[str, dict]:
+    """
+    Fetch live prices for multiple symbols in one query.
+    Returns a dict keyed by symbol.
+    """
+    if not symbols:
+        return {}
+    query = """
+        SELECT symbol, bid, ask, feed, updated_at
+        FROM live_prices
+        WHERE symbol = ANY($1::text[])
+    """
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(query, symbols)
+    return {r["symbol"]: _record_to_dict(r) for r in rows}

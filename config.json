@@ -1,27 +1,29 @@
 {
   "poll_interval_seconds": 5,
-
   "filters": {
     "instruments": {
       "mode": "all",
-      "list": ["XAUUSD"]
+      "list": [
+        "XAUUSD"
+      ]
     },
     "asset_classes": {
       "mode": "all",
-      "list": ["metals", "forex"]
+      "list": [
+        "metals",
+        "forex"
+      ]
     },
     "directions": "both",
     "scalp_signals": true,
     "signal_types": "all"
   },
-
   "execution": {
     "risk_percent": 5.0,
     "min_lot": 0.01,
     "skip_if_price_past_limit": true,
     "place_all_limits_simultaneously": true
   },
-
   "tp": {
     "profit_threshold_pips": {
       "default": 7,
@@ -41,19 +43,23 @@
       }
     }
   },
-
   "symbol_map": {
     "XAUUSD": "XAUUSD",
-    "XAGUSD": "XAGUSD",
     "GOLD": "XAUUSD",
+    "XAGUSD": "XAGUSD",
     "SILVER": "XAGUSD",
     "EURUSD": "EURUSD",
     "GBPUSD": "GBPUSD",
     "USDJPY": "USDJPY",
     "GBPJPY": "GBPJPY",
-    "nas100usd": "NAS100",
-    "nas100": "NAS100",
-    "spx500usd": "SP500",
-    "spx500": "SP500"
+    "SPX500USD": "US500",
+    "NAS100USD": "USTEC",
+    "BTCUSDT": "BTCUSD",
+    "ETHUSDT": "ETHUSD"
+  },
+  "live_prices": {
+    "max_staleness_seconds": 30,
+    "offset_readjust_interval_seconds": 60,
+    "offset_readjust_threshold_pips": 2.0
   }
 }
