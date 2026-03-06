@@ -22,11 +22,11 @@
     "enabled": false,
     "default_pips": 500,
     "per_asset_class": {
-      "metals":  500,
-      "forex":   200,
+      "metals": 500,
+      "forex": 200,
       "indices": 1000,
-      "crypto":  2000,
-      "stocks":  300
+      "crypto": 2000,
+      "stocks": 300
     },
     "per_instrument": {
       "XAUUSD": 500
@@ -39,23 +39,27 @@
     "place_all_limits_simultaneously": true
   },
   "tp": {
-    "profit_threshold_pips": {
+    "profit_threshold": {
+      "unit": "pips",
       "default": 7,
       "per_instrument": {
-        "XAUUSD": 15
+        "XAUUSD": 2.0
+      },
+      "per_instrument_unit": {
+        "XAUUSD": "dollars"
       }
     },
-    "breakeven_buffer_pips": {
-      "default": 2,
-      "per_instrument": {}
-    },
-    "partial_close_percent": 50,
-    "trail_pips": {
+    "trail": {
+      "unit": "pips",
       "default": 3,
       "per_instrument": {
-        "XAUUSD": 8
+        "XAUUSD": 2.0
+      },
+      "per_instrument_unit": {
+        "XAUUSD": "dollars"
       }
-    }
+    },
+    "partial_close_percent": 50
   },
   "symbol_map": {
     "XAUUSD": "XAUUSD",

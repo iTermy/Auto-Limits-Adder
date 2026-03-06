@@ -69,10 +69,13 @@ class TPContext:
     # All open positions for the same signal (including this one)
     sibling_positions: list[dict] = field(default_factory=list)
     # Strategy params resolved for this instrument
-    profit_threshold_pips: float = 7.0
-    breakeven_buffer_pips: float = 2.0
-    partial_close_pct:     float = 50.0
-    trail_pips:            float = 3.0
+    # profit_threshold and trail carry the resolved value; use_dollars flags
+    # tell the strategy whether the value is in dollars or pips.
+    profit_threshold:          float = 7.0
+    trail:                     float = 3.0
+    profit_threshold_dollars:  bool  = False
+    trail_dollars:             bool  = False
+    partial_close_pct:         float = 50.0
 
 
 @dataclass
@@ -93,20 +96,33 @@ class BaseTPStrategy(ABC):
         self.config = config
         self._tp_cfg = config.get("tp", {})
 
-    def get_profit_threshold_pips(self, symbol: str) -> float:
-        per_inst = self._tp_cfg.get("profit_threshold_pips", {}).get("per_instrument", {})
-        default  = self._tp_cfg.get("profit_threshold_pips", {}).get("default", 7)
-        return per_inst.get(symbol, default)
+    def _resolve_threshold(self, key: str, symbol: str, fallback: float) -> tuple[float, bool]:
+        """
+        Resolve a threshold value and its unit for a symbol.
 
-    def get_breakeven_buffer_pips(self, symbol: str) -> float:
-        per_inst = self._tp_cfg.get("breakeven_buffer_pips", {}).get("per_instrument", {})
-        default  = self._tp_cfg.get("breakeven_buffer_pips", {}).get("default", 2)
-        return per_inst.get(symbol, default)
+        Reads config like:
+            "profit_threshold": {
+                "unit": "pips",          <- default unit
+                "default": 7,
+                "per_instrument": { "XAUUSD": 2.0 },
+                "per_instrument_unit": { "XAUUSD": "dollars" }
+            }
 
-    def get_trail_pips(self, symbol: str) -> float:
-        per_inst = self._tp_cfg.get("trail_pips", {}).get("per_instrument", {})
-        default  = self._tp_cfg.get("trail_pips", {}).get("default", 3)
-        return per_inst.get(symbol, default)
+        Returns (value, use_dollars).
+        """
+        block = self._tp_cfg.get(key, {})
+        value = block.get("per_instrument", {}).get(symbol,
+                block.get("default", fallback))
+        # Determine unit: per-instrument override first, then block default
+        unit = block.get("per_instrument_unit", {}).get(symbol,
+               block.get("unit", "pips"))
+        return float(value), (unit == "dollars")
+
+    def get_profit_threshold(self, symbol: str) -> tuple[float, bool]:
+        return self._resolve_threshold("profit_threshold", symbol, 7.0)
+
+    def get_trail(self, symbol: str) -> tuple[float, bool]:
+        return self._resolve_threshold("trail", symbol, 3.0)
 
     def get_partial_close_pct(self) -> float:
         return self._tp_cfg.get("partial_close_percent", 50)
@@ -129,8 +145,8 @@ class DefaultTPStrategy(BaseTPStrategy):
     Mirrors the Limits-Alert-Bot auto-TP logic with a partial-close twist.
 
     Trigger conditions (per-signal, evaluated once per tick):
-      1. The most-recently-hit position is ≥ profit_threshold_pips in profit.
-      2. All other positions for this signal are ≥ breakeven_buffer_pips above entry.
+      1. The most-recently-hit position is >= profit_threshold in profit.
+      2. All other open positions for this signal are at breakeven (>= entry).
 
     On trigger:
       • Breakeven positions: close 100% immediately.
@@ -143,7 +159,7 @@ class DefaultTPStrategy(BaseTPStrategy):
     def __init__(self, config: dict):
         super().__init__(config)
         # Track which tickets are in "trailing" phase
-        self._trailing: dict[int, float] = {}   # ticket → trail_pips
+        self._trailing: dict[int, float] = {}   # ticket -> trail value in pips
 
     def on_tick(self, position: dict, context: TPContext) -> TPAction:
         ticket = position["ticket"]
@@ -155,9 +171,6 @@ class DefaultTPStrategy(BaseTPStrategy):
                 trail_pips=self._trailing[ticket],
                 reason="trailing stop update",
             )
-
-        # Compute how many pips this position is currently in profit
-        profit_pips = self._pips_in_profit(position, context)
 
         # Check if trigger conditions are met across all sibling positions
         if not self._trigger_conditions_met(position, context):
@@ -172,14 +185,19 @@ class DefaultTPStrategy(BaseTPStrategy):
             close_lots = math.floor(position["volume"] * close_pct * 100) / 100  # floor to 0.01
             close_lots = max(close_lots, 0.01)
 
-            trail = context.trail_pips
-            self._trailing[ticket] = trail
+            # Convert trail to pips for MT5 (trail value stored in context is already
+            # in the correct unit; convert dollars -> pips here if needed)
+            if context.trail_dollars:
+                trail_pips = mt5_api.price_to_pips(context.trail, context.symbol)
+            else:
+                trail_pips = context.trail
+            self._trailing[ticket] = trail_pips
 
             return TPAction(
                 action="close_partial",
                 close_lots=close_lots,
-                trail_pips=trail,
-                reason=f"TP triggered — closing {close_pct*100:.0f}%, trailing {trail} pips",
+                trail_pips=trail_pips,
+                reason=f"TP triggered — closing {close_pct*100:.0f}%, trailing {trail_pips:.1f} pips",
             )
         else:
             # Breakeven position: close 100%
@@ -189,52 +207,49 @@ class DefaultTPStrategy(BaseTPStrategy):
                 reason="TP triggered — closing breakeven position",
             )
 
-    def _pips_in_profit(self, position: dict, context: TPContext) -> float:
+    def _price_move(self, position: dict, context: TPContext) -> float:
+        """Raw price-unit profit for a position (positive = in profit)."""
         entry = position.get("price_open", context.entry_price)
         if position.get("type", context.position_type) == 0:   # buy
-            current = context.current_bid
-            return mt5_api.price_to_pips(current - entry, context.symbol)
+            return context.current_bid - entry
         else:  # sell
-            current = context.current_ask
-            return mt5_api.price_to_pips(entry - current, context.symbol)
+            return entry - context.current_ask
 
     def _trigger_conditions_met(self, position: dict, context: TPContext) -> bool:
         """
         Returns True if:
-          1. The most-recently-hit sibling is ≥ profit_threshold_pips in profit, AND
-          2. All other siblings are ≥ breakeven_buffer_pips above entry.
+          1. The most-recently-hit sibling has moved >= profit_threshold in profit.
+          2. All other open positions for this signal are at or above entry (breakeven).
+
+        profit_threshold is compared in dollars if context.profit_threshold_dollars,
+        otherwise in pips. Breakeven check is always in the same unit.
         """
         siblings = context.sibling_positions
         if not siblings:
             return False
 
         profit_ticket = self._most_recently_hit_ticket(siblings)
-
-        # Find the profit position and check it's enough in profit
         profit_pos = next((p for p in siblings if p["ticket"] == profit_ticket), None)
         if profit_pos is None:
             return False
 
-        profit_pips = self._calc_pips_profit(profit_pos, context)
-        if profit_pips < context.profit_threshold_pips:
-            return False
+        # Check profit position has hit threshold
+        if context.profit_threshold_dollars:
+            if self._price_move(profit_pos, context) < context.profit_threshold:
+                return False
+        else:
+            profit_pips = mt5_api.price_to_pips(self._price_move(profit_pos, context), context.symbol)
+            if profit_pips < context.profit_threshold:
+                return False
 
-        # Check all OTHER positions are at breakeven
+        # Check all other positions are at breakeven (>= entry)
         for pos in siblings:
             if pos["ticket"] == profit_ticket:
                 continue
-            pos_pips = self._calc_pips_profit(pos, context)
-            if pos_pips < context.breakeven_buffer_pips:
+            if self._price_move(pos, context) < 0:
                 return False
 
         return True
-
-    def _calc_pips_profit(self, position: dict, context: TPContext) -> float:
-        entry = position.get("price_open", 0.0)
-        if position.get("type", 0) == 0:   # buy
-            return mt5_api.price_to_pips(context.current_bid - entry, context.symbol)
-        else:
-            return mt5_api.price_to_pips(entry - context.current_ask, context.symbol)
 
     def _most_recently_hit_ticket(self, positions: list[dict]) -> Optional[int]:
         """
@@ -351,20 +366,24 @@ class TPEngine:
                 mapping = local_db.get_mapping_by_ticket(ticket)
                 limit_id = position.get("limit_id", 0)
 
+                pt_value, pt_dollars = self.strategy.get_profit_threshold(symbol)
+                trail_value, trail_dollars = self.strategy.get_trail(symbol)
+
                 context = TPContext(
-                    symbol                = symbol,
-                    current_bid           = bid,
-                    current_ask           = ask,
-                    position_type         = position["type"],
-                    entry_price           = position["price_open"],
-                    lot_size              = position["volume"],
-                    signal_id             = signal_id,
-                    limit_id              = limit_id,
-                    sibling_positions     = sibling_list,
-                    profit_threshold_pips = self.strategy.get_profit_threshold_pips(symbol),
-                    breakeven_buffer_pips = self.strategy.get_breakeven_buffer_pips(symbol),
-                    partial_close_pct     = self.strategy.get_partial_close_pct(),
-                    trail_pips            = self.strategy.get_trail_pips(symbol),
+                    symbol                     = symbol,
+                    current_bid                = bid,
+                    current_ask                = ask,
+                    position_type              = position["type"],
+                    entry_price                = position["price_open"],
+                    lot_size                   = position["volume"],
+                    signal_id                  = signal_id,
+                    limit_id                   = limit_id,
+                    sibling_positions          = sibling_list,
+                    profit_threshold           = pt_value,
+                    profit_threshold_dollars   = pt_dollars,
+                    trail                      = trail_value,
+                    trail_dollars              = trail_dollars,
+                    partial_close_pct          = self.strategy.get_partial_close_pct(),
                 )
 
                 action = self.strategy.on_tick(position, context)
