@@ -36,6 +36,23 @@ The feed-vs-MT5 spread can drift over time. Every offset_readjust_interval_secon
   - If live_prices data is stale (> max_staleness_seconds), skip readjustment
     and leave the order in place.
 
+Spread adjustment
+──────────────────
+Every order placement fetches the live bid/ask spread from MT5 and shifts both
+the entry price and stop-loss to account for it:
+
+  LONG  entry  (+spread): BUY_LIMIT/BUY_STOP fires on ASK → place higher so
+                           the order triggers when BID (mid) reaches the DB level.
+  LONG  SL     (-spread): MT5 closes a long when BID drops → push SL further
+                           down so spread noise doesn't trigger it prematurely.
+  SHORT entry  (-spread): SELL_LIMIT/SELL_STOP fires on BID → place lower so
+                           the order triggers when ASK (mid) reaches the DB level.
+  SHORT SL     (+spread): MT5 closes a short when ASK rises → push SL further
+                           up so spread noise doesn't trigger it prematurely.
+
+Because the spread is re-fetched live on every placement (including readjust
+re-placements), spread drift is handled automatically with no extra machinery.
+
 Design: The DB is the source of truth. Every cycle is idempotent — running it
 twice in a row has no additional effect.
 """
@@ -518,8 +535,20 @@ class SyncEngine:
         from feed-price space into MT5-price space using the live offset, then
         places a normal pending order at the adjusted price.
 
-        The pip distance between entry and SL is identical in both price spaces
-        (offset cancels out), so lot sizing uses the raw DB prices as-is.
+        Spread adjustment
+        ─────────────────
+        The DB price_level/stop_loss represent the market price (mid/bid side) at
+        which the signal should trigger.  MT5 pending orders fire on the wrong side
+        of the spread, so both entry and SL are shifted by the current spread:
+
+          LONG  entry  (+spread): BUY_LIMIT/BUY_STOP triggers on ASK  → shift up
+          LONG  SL     (-spread): MT5 closes long when BID falls below → shift down (wider)
+          SHORT entry  (-spread): SELL_LIMIT/SELL_STOP triggers on BID → shift down
+          SHORT SL     (+spread): MT5 closes short when ASK rises above → shift up (wider)
+
+        The spread is re-fetched live every time an order is placed, so drift is
+        naturally handled — re-placement from the readjust loop also re-applies
+        the current spread.
         """
         instrument = signal["instrument"]
         symbol     = map_instrument_to_symbol(instrument, self.symbol_map)
@@ -551,11 +580,11 @@ class SyncEngine:
                 mt5_mid  = (mt5_prices[0] + mt5_prices[1]) / 2.0
                 feed_mid = mt5_mid - offset
 
-        # Translate DB prices into MT5 price space
+        # Step 1: translate DB prices into MT5 price space (feed offset)
         mt5_order_price = db_price + offset
         mt5_sl          = db_sl + offset
 
-        # Current MT5 price (for order type resolution)
+        # Current MT5 price (for order type resolution and spread fetch)
         prices = mt5_api.get_current_price(symbol)
         if prices is None:
             logger.warning(f"Cannot get MT5 price for {symbol} — skipping limit {lim['id']}")
@@ -563,6 +592,34 @@ class SyncEngine:
 
         bid, ask    = prices
         mt5_mid_now = (bid + ask) / 2.0
+
+        # Step 2: spread adjustment
+        # Re-fetch live spread so the adjustment is always current.
+        spread = mt5_api.get_current_spread(symbol)
+        if spread is None:
+            logger.warning(
+                f"Cannot fetch spread for {symbol} — placing without spread adjustment "
+                f"for limit {lim['id']}"
+            )
+            spread = 0.0
+
+        if direction == "long":
+            # BUY orders trigger on ASK; DB price is bid-equivalent → shift entry up
+            # SL triggers on BID; push it further down to avoid premature stops
+            mt5_order_price += spread
+            mt5_sl          -= spread
+        else:  # short
+            # SELL orders trigger on BID; DB price is ask-equivalent → shift entry down
+            # SL triggers on ASK; push it further up to avoid premature stops
+            mt5_order_price -= spread
+            mt5_sl          += spread
+
+        spread_pips = mt5_api.price_to_pips(spread, symbol)
+        logger.debug(
+            f"Spread adjustment {symbol}: spread={spread:.5f} ({spread_pips:.1f} pips), "
+            f"direction={direction}, adjusted entry={mt5_order_price:.5f}, "
+            f"adjusted sl={mt5_sl:.5f}"
+        )
 
         # Skip if price already past the adjusted limit
         if self.execution.get("skip_if_price_past_limit", True):
@@ -582,8 +639,9 @@ class SyncEngine:
 
         order_type = mt5_api.resolve_order_type(direction, mt5_order_price, mt5_mid_now)
 
-        # SL distance: offset cancels, so raw DB prices give correct pip distance
-        sl_distance = abs(db_price - db_sl)
+        # Lot sizing uses the spread-adjusted prices — this is the true risk
+        # distance in MT5 price space (entry to SL, both on their trigger sides).
+        sl_distance = abs(mt5_order_price - mt5_sl)
 
         account = mt5_api.get_account_info()
         if account is None:
@@ -634,8 +692,9 @@ class SyncEngine:
         logger.info(
             f"Placed {mt5_api.order_type_to_str(order_type)}: "
             f"ticket={ticket}, symbol={symbol}, lot={lot_size}, "
-            f"price={mt5_order_price:.5f} (db={db_price:.5f}, offset={offset:+.5f}), "
-            f"sl={mt5_sl:.5f}, limit_id={lim['id']}, signal_id={signal['id']}"
+            f"price={mt5_order_price:.5f} (db={db_price:.5f}, offset={offset:+.5f}, "
+            f"spread={spread:.5f}), sl={mt5_sl:.5f}, "
+            f"limit_id={lim['id']}, signal_id={signal['id']}"
         )
 
     # ------------------------------------------------------------------

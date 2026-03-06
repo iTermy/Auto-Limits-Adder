@@ -97,6 +97,18 @@ def get_current_price(symbol: str) -> Optional[tuple[float, float]]:
     return tick.bid, tick.ask
 
 
+def get_current_spread(symbol: str) -> Optional[float]:
+    """
+    Return the current spread for a symbol as a raw price distance (ask - bid).
+    Returns None if tick data is unavailable.
+    """
+    tick = mt5.symbol_info_tick(symbol)
+    if tick is None:
+        logger.warning(f"No tick data for {symbol} when fetching spread: {mt5.last_error()}")
+        return None
+    return tick.ask - tick.bid
+
+
 def get_pip_value(symbol: str, lot_size: float = 1.0) -> Optional[float]:
     """
     Return the monetary value of 1 pip for lot_size lots in account currency.

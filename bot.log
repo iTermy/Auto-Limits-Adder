@@ -21012,3 +21012,26 @@ asyncpg.exceptions.ConnectionDoesNotExistError: connection was closed in the mid
 2026-03-06 12:54:06  INFO      db — Supabase connection pool closed.
 2026-03-06 12:54:06  INFO      mt5 — MT5 disconnected.
 2026-03-06 12:54:06  INFO      __main__ — Shutdown complete.
+2026-03-06 13:05:01  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 13:05:01  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 13:05:01  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 13:05:01  INFO      __main__ — Connecting to MT5...
+2026-03-06 13:05:01  INFO      mt5 — MT5 connected — account 52776073, balance 9972.00 USD, server ICMarketsSC-Demo
+2026-03-06 13:05:01  INFO      __main__ — Connecting to Supabase...
+2026-03-06 13:05:04  INFO      db — Supabase connection pool created.
+2026-03-06 13:05:04  INFO      sync — Running startup reconciliation...
+2026-03-06 13:05:04  INFO      sync — Startup reconciliation complete.
+2026-03-06 13:05:04  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-06 13:05:06  INFO      sync — Limit 223 no longer pending in DB — cancelling ticket 1518356592
+2026-03-06 13:05:06  INFO      mt5 — Cancelled pending order ticket=1518356592
+2026-03-06 13:07:04  INFO      mt5 — Placed buy_limit order: ticket=1518384120, symbol=XAUUSD, lot=0.99, price=5136.0, sl=5131.0
+2026-03-06 13:07:04  INFO      sync — Placed buy_limit: ticket=1518384120, symbol=XAUUSD, lot=0.99, price=5136.00000 (db=5136.00000, offset=+0.00000), sl=5131.00000, limit_id=226, signal_id=89
+2026-03-06 13:07:27  INFO      mt5 — Placed sell_limit order: ticket=1518385382, symbol=XAUUSD, lot=0.99, price=5145.0, sl=5150.0
+2026-03-06 13:07:27  INFO      sync — Placed sell_limit: ticket=1518385382, symbol=XAUUSD, lot=0.99, price=5145.00000 (db=5145.00000, offset=+0.00000), sl=5150.00000, limit_id=227, signal_id=90
+2026-03-06 13:08:03  INFO      sync — Limit 227 no longer pending in DB — cancelling ticket 1518385382
+2026-03-06 13:08:20  INFO      mt5 — Cancelled pending order ticket=1518385382
+2026-03-06 13:16:55  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-06 13:16:55  INFO      __main__ — Shutting down...
+2026-03-06 13:16:55  INFO      db — Supabase connection pool closed.
+2026-03-06 13:16:55  INFO      mt5 — MT5 disconnected.
+2026-03-06 13:16:55  INFO      __main__ — Shutdown complete.
