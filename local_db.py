@@ -47,7 +47,10 @@ CREATE TABLE IF NOT EXISTS order_mappings (
     feed_price_at_placement  REAL,   -- OANDA/Binance mid price when order was placed
     mt5_price_at_placement   REAL,   -- MT5 mid price when order was placed
     offset_at_placement      REAL,   -- mt5 - feed at placement time
-    last_offset_check        TEXT    -- ISO timestamp of last offset readjustment check
+    last_offset_check        TEXT,   -- ISO timestamp of last offset readjustment check
+    -- SL tracking (for detecting SL edits on already-filled positions)
+    db_stop_loss             REAL,   -- signal stop_loss (DB space) at placement time
+    last_known_mt5_sl        REAL    -- the MT5-space SL we last applied (for change detection)
 );
 
 CREATE INDEX IF NOT EXISTS idx_om_signal_id ON order_mappings(signal_id);
@@ -68,9 +71,10 @@ CREATE INDEX IF NOT EXISTS idx_dl_signal_id ON deferred_limits(signal_id);
 """
 
 
-# ---------------------------------------------------------------------------
-# Connection
-# ---------------------------------------------------------------------------
+DDL_MIGRATIONS = """
+ALTER TABLE order_mappings ADD COLUMN db_stop_loss REAL;
+ALTER TABLE order_mappings ADD COLUMN last_known_mt5_sl REAL;
+"""
 
 def get_connection(db_path: str = DB_PATH) -> sqlite3.Connection:
     """Open (or create) the SQLite database and return a connection."""
@@ -83,6 +87,17 @@ def init_db(db_path: str = DB_PATH) -> None:
     """Create tables if they don't exist. Safe to call on every startup."""
     with get_connection(db_path) as conn:
         conn.executescript(DDL)
+        # Apply additive column migrations idempotently (ALTER TABLE ADD COLUMN
+        # raises OperationalError if the column already exists — ignore safely).
+        for stmt in DDL_MIGRATIONS.strip().splitlines():
+            stmt = stmt.strip()
+            if not stmt:
+                continue
+            try:
+                conn.execute(stmt)
+            except sqlite3.OperationalError:
+                pass  # Column already exists — safe to ignore
+        conn.commit()
     logger.info(f"Local SQLite DB initialised at '{db_path}'.")
 
 
@@ -108,6 +123,7 @@ def insert_order_mapping(
     mt5_ticket: int,
     order_type: str,
     lot_size: float,
+    db_stop_loss: float = None,
     db_path: str = DB_PATH,
 ) -> int:
     """
@@ -116,11 +132,11 @@ def insert_order_mapping(
     """
     sql = """
         INSERT OR IGNORE INTO order_mappings
-            (limit_id, signal_id, mt5_ticket, order_type, lot_size, placed_at, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'pending')
+            (limit_id, signal_id, mt5_ticket, order_type, lot_size, placed_at, status, db_stop_loss)
+        VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
     """
     with get_connection(db_path) as conn:
-        cur = conn.execute(sql, (limit_id, signal_id, mt5_ticket, order_type, lot_size, _now_iso()))
+        cur = conn.execute(sql, (limit_id, signal_id, mt5_ticket, order_type, lot_size, _now_iso(), db_stop_loss))
         conn.commit()
         if cur.rowcount == 0:
             # Duplicate — row already existed. Log and return existing id.
@@ -357,3 +373,43 @@ def get_all_deferred_signal_ids(db_path: str = DB_PATH) -> set[int]:
             "SELECT DISTINCT signal_id FROM deferred_limits"
         ).fetchall()
     return {r["signal_id"] for r in rows}
+
+
+# ---------------------------------------------------------------------------
+# SL-sync helpers (for updating filled positions when the signal SL changes)
+# ---------------------------------------------------------------------------
+
+def get_filled_mappings_by_signal_ids(
+    signal_ids: list[int], db_path: str = DB_PATH
+) -> list[dict]:
+    """
+    Return all filled order mappings for a set of signal IDs.
+    Used to detect when a signal's stop_loss has been edited after fill.
+    """
+    if not signal_ids:
+        return []
+    placeholders = ",".join("?" * len(signal_ids))
+    sql = f"""
+        SELECT * FROM order_mappings
+        WHERE signal_id IN ({placeholders}) AND status = 'filled'
+    """
+    with get_connection(db_path) as conn:
+        rows = conn.execute(sql, signal_ids).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def update_known_mt5_sl(
+    mt5_ticket: int, db_stop_loss: float, mt5_sl: float, db_path: str = DB_PATH
+) -> None:
+    """
+    Record the DB-space stop_loss and the MT5-space SL we last applied
+    to a filled position.  Called after successfully modifying the SL in MT5.
+    """
+    sql = """
+        UPDATE order_mappings
+        SET db_stop_loss = ?, last_known_mt5_sl = ?
+        WHERE mt5_ticket = ?
+    """
+    with get_connection(db_path) as conn:
+        conn.execute(sql, (db_stop_loss, mt5_sl, mt5_ticket))
+        conn.commit()

@@ -36,7 +36,8 @@
     "risk_percent": 5.0,
     "min_lot": 0.01,
     "skip_if_price_past_limit": true,
-    "place_all_limits_simultaneously": true
+    "place_all_limits_simultaneously": true,
+    "lot_recheck_interval_seconds": 300
   },
   "tp": {
     "profit_threshold": {

@@ -21035,3 +21035,99 @@ asyncpg.exceptions.ConnectionDoesNotExistError: connection was closed in the mid
 2026-03-06 13:16:55  INFO      db — Supabase connection pool closed.
 2026-03-06 13:16:55  INFO      mt5 — MT5 disconnected.
 2026-03-06 13:16:55  INFO      __main__ — Shutdown complete.
+2026-03-06 13:16:57  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 13:16:57  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 13:16:57  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 13:16:57  INFO      __main__ — Connecting to MT5...
+2026-03-06 13:16:57  INFO      mt5 — MT5 connected — account 52776073, balance 9972.00 USD, server ICMarketsSC-Demo
+2026-03-06 13:16:57  INFO      __main__ — Connecting to Supabase...
+2026-03-06 13:17:00  INFO      db — Supabase connection pool created.
+2026-03-06 13:17:00  INFO      sync — Running startup reconciliation...
+2026-03-06 13:17:00  INFO      sync — Startup reconciliation complete.
+2026-03-06 13:17:00  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-06 13:17:28  INFO      mt5 — Placed buy_limit order: ticket=1518398729, symbol=XAUUSD, lot=0.97, price=5138.07, sl=5132.93
+2026-03-06 13:17:28  INFO      sync — Placed buy_limit: ticket=1518398729, symbol=XAUUSD, lot=0.97, price=5138.07000 (db=5138.00000, offset=+0.00000, spread=0.07000), sl=5132.93000, limit_id=228, signal_id=91
+2026-03-06 13:17:29  INFO      mt5 — Placed sell_limit order: ticket=1518398920, symbol=XAUUSD, lot=0.97, price=5145.950000000001, sl=5151.049999999999
+2026-03-06 13:17:29  INFO      sync — Placed sell_limit: ticket=1518398920, symbol=XAUUSD, lot=0.97, price=5145.95000 (db=5146.00000, offset=+0.00000, spread=0.05000), sl=5151.05000, limit_id=229, signal_id=92
+2026-03-06 13:18:05  INFO      sync — Limit 226 no longer pending in DB — cancelling ticket 1518384120
+2026-03-06 13:18:25  INFO      mt5 — Cancelled pending order ticket=1518384120
+2026-03-06 13:20:21  INFO      sync — Fill detected: ticket=1518398920, limit_id=229, signal_id=92
+2026-03-06 13:20:21  INFO      tp — TPEngine: registered position ticket=1518398920, signal_id=92, symbol=XAUUSD, lots=0.97
+2026-03-06 13:22:02  INFO      mt5 — Placed sell_limit order: ticket=1518402981, symbol=XAUUSD, lot=0.48, price=5148.9400000000005, sl=5154.0599999999995
+2026-03-06 13:22:02  INFO      sync — Placed sell_limit: ticket=1518402981, symbol=XAUUSD, lot=0.48, price=5148.94000 (db=5149.00000, offset=+0.00000, spread=0.06000), sl=5154.06000, limit_id=231, signal_id=92
+2026-03-06 13:23:38  INFO      sync — Fill detected: ticket=1518402981, limit_id=231, signal_id=92
+2026-03-06 13:23:38  INFO      tp — TPEngine: registered position ticket=1518402981, signal_id=92, symbol=XAUUSD, lots=0.48
+2026-03-06 13:25:49  INFO      tp — TPEngine: position 1518398920 closed externally — removing from tracker.
+2026-03-06 13:28:09  INFO      sync — Limit 228 no longer pending in DB — cancelling ticket 1518398729
+2026-03-06 13:28:18  INFO      mt5 — Cancelled pending order ticket=1518398729
+2026-03-06 13:28:24  INFO      tp — TPEngine: position 1518402981 closed externally — removing from tracker.
+2026-03-06 13:29:38  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-06 13:29:38  INFO      __main__ — Shutting down...
+2026-03-06 13:29:38  INFO      db — Supabase connection pool closed.
+2026-03-06 13:29:38  INFO      mt5 — MT5 disconnected.
+2026-03-06 13:29:38  INFO      __main__ — Shutdown complete.
+2026-03-06 13:38:12  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 13:38:12  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 13:38:12  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 13:38:12  INFO      __main__ — Connecting to MT5...
+2026-03-06 13:38:12  INFO      mt5 — MT5 connected — account 52776073, balance 9321.56 USD, server ICMarketsSC-Demo
+2026-03-06 13:38:12  INFO      __main__ — Connecting to Supabase...
+2026-03-06 13:38:15  INFO      db — Supabase connection pool created.
+2026-03-06 13:38:15  INFO      sync — Running startup reconciliation...
+2026-03-06 13:38:15  INFO      sync — No pending local mappings to reconcile.
+2026-03-06 13:38:15  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-06 13:38:58  INFO      mt5 — Placed sell_limit order: ticket=1518422624, symbol=XAUUSD, lot=0.91, price=5155.95, sl=5161.05
+2026-03-06 13:38:58  INFO      sync — Placed sell_limit: ticket=1518422624, symbol=XAUUSD, lot=0.91, price=5155.95000 (db=5156.00000, offset=+0.00000, spread=0.05000), sl=5161.05000, limit_id=232, signal_id=93
+2026-03-06 13:39:07  INFO      mt5 — Placed buy_limit order: ticket=1518423244, symbol=XAUUSD, lot=0.89, price=5147.11, sl=5141.89
+2026-03-06 13:39:07  INFO      sync — Placed buy_limit: ticket=1518423244, symbol=XAUUSD, lot=0.89, price=5147.11000 (db=5147.00000, offset=+0.00000, spread=0.11000), sl=5141.89000, limit_id=233, signal_id=94
+2026-03-06 13:39:16  INFO      sync — Fill detected: ticket=1518422624, limit_id=232, signal_id=93
+2026-03-06 13:39:16  INFO      tp — TPEngine: registered position ticket=1518422624, signal_id=93, symbol=XAUUSD, lots=0.91
+2026-03-06 13:39:32  INFO      mt5 — Placed buy_limit order: ticket=1518424290, symbol=XAUUSD, lot=0.13, price=5147.07, sl=5135.93
+2026-03-06 13:39:32  INFO      sync — Placed buy_limit: ticket=1518424290, symbol=XAUUSD, lot=0.13, price=5147.07000 (db=5147.00000, offset=+0.00000, spread=0.07000), sl=5135.93000, limit_id=234, signal_id=94
+2026-03-06 13:39:33  INFO      mt5 — Placed buy_limit order: ticket=1518424351, symbol=XAUUSD, lot=0.18, price=5144.11, sl=5135.89
+2026-03-06 13:39:33  INFO      sync — Placed buy_limit: ticket=1518424351, symbol=XAUUSD, lot=0.18, price=5144.11000 (db=5144.00000, offset=+0.00000, spread=0.11000), sl=5135.89000, limit_id=235, signal_id=94
+2026-03-06 13:39:34  INFO      mt5 — Placed buy_limit order: ticket=1518424383, symbol=XAUUSD, lot=0.3, price=5141.05, sl=5135.95
+2026-03-06 13:39:34  INFO      sync — Placed buy_limit: ticket=1518424383, symbol=XAUUSD, lot=0.3, price=5141.05000 (db=5141.00000, offset=+0.00000, spread=0.05000), sl=5135.95000, limit_id=236, signal_id=94
+2026-03-06 13:39:34  INFO      sync — Limit 233 no longer pending in DB — cancelling ticket 1518423244
+2026-03-06 13:39:34  INFO      mt5 — Cancelled pending order ticket=1518423244
+2026-03-06 13:39:35  INFO      sync — SL change detected for signal 93, ticket 1518422624 (XAUUSD): last_known_mt5_sl=5161.05000 -> new_mt5_sl=5161.11000 (db_sl=5161.00000, offset=+0.00000)
+2026-03-06 13:39:36  INFO      mt5 — Updated SL on position ticket=1518422624 (XAUUSD): 5161.05000 → 5161.11000
+2026-03-06 13:39:44  INFO      sync — SL change detected for signal 93, ticket 1518422624 (XAUUSD): last_known_mt5_sl=5161.11000 -> new_mt5_sl=5161.05000 (db_sl=5161.00000, offset=+0.00000)
+2026-03-06 13:39:49  INFO      mt5 — Updated SL on position ticket=1518422624 (XAUUSD): 5161.11000 → 5161.05000
+2026-03-06 13:39:57  INFO      sync — SL change detected for signal 93, ticket 1518422624 (XAUUSD): last_known_mt5_sl=5161.05000 -> new_mt5_sl=5161.06000 (db_sl=5161.00000, offset=+0.00000)
+2026-03-06 13:40:08  INFO      mt5 — Updated SL on position ticket=1518422624 (XAUUSD): 5161.05000 → 5161.06000
+2026-03-06 13:40:16  INFO      sync — SL change detected for signal 93, ticket 1518422624 (XAUUSD): last_known_mt5_sl=5161.06000 -> new_mt5_sl=5161.10000 (db_sl=5161.00000, offset=+0.00000)
+2026-03-06 13:40:17  INFO      mt5 — Updated SL on position ticket=1518422624 (XAUUSD): 5161.06000 → 5161.10000
+2026-03-06 13:40:25  INFO      sync — SL change detected for signal 93, ticket 1518422624 (XAUUSD): last_known_mt5_sl=5161.10000 -> new_mt5_sl=5161.11000 (db_sl=5161.00000, offset=+0.00000)
+2026-03-06 13:41:37  INFO      mt5 — Updated SL on position ticket=1518422624 (XAUUSD): 5161.10000 → 5161.11000
+2026-03-06 13:43:25  INFO      mt5 — Placed sell_limit order: ticket=1518427552, symbol=XAUUSD, lot=0.9, price=5162.92, sl=5168.08
+2026-03-06 13:43:25  INFO      sync — Placed sell_limit: ticket=1518427552, symbol=XAUUSD, lot=0.9, price=5162.92000 (db=5163.00000, offset=+0.00000, spread=0.08000), sl=5168.08000, limit_id=237, signal_id=95
+2026-03-06 13:43:43  INFO      sync — Limit 237 no longer pending in DB — cancelling ticket 1518427552
+2026-03-06 13:43:44  INFO      mt5 — Cancelled pending order ticket=1518427552
+2026-03-06 13:43:55  INFO      tp — TPEngine: position 1518422624 closed externally — removing from tracker.
+2026-03-06 13:44:46  INFO      mt5 — Placed sell_limit order: ticket=1518429982, symbol=XAUUSD, lot=0.84, price=5169.950000000001, sl=5175.049999999999
+2026-03-06 13:44:46  INFO      sync — Placed sell_limit: ticket=1518429982, symbol=XAUUSD, lot=0.84, price=5169.95000 (db=5170.00000, offset=+0.00000, spread=0.05000), sl=5175.05000, limit_id=238, signal_id=96
+2026-03-06 13:47:52  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-06 13:47:54  INFO      __main__ — Shutting down...
+2026-03-06 13:47:54  INFO      db — Supabase connection pool closed.
+2026-03-06 13:47:54  INFO      mt5 — MT5 disconnected.
+2026-03-06 13:47:54  INFO      __main__ — Shutdown complete.
+2026-03-06 13:47:57  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 13:47:57  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 13:47:57  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 13:47:57  INFO      __main__ — Connecting to MT5...
+2026-03-06 13:47:58  INFO      mt5 — MT5 connected — account 52776073, balance 8591.73 USD, server ICMarketsSC-Demo
+2026-03-06 13:47:58  INFO      __main__ — Connecting to Supabase...
+2026-03-06 13:48:01  INFO      db — Supabase connection pool created.
+2026-03-06 13:48:01  INFO      sync — Running startup reconciliation...
+2026-03-06 13:48:01  INFO      sync — Startup reconciliation complete.
+2026-03-06 13:48:01  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-06 13:49:43  INFO      sync — Limit 238 no longer pending in DB — cancelling ticket 1518429982
+2026-03-06 13:49:58  INFO      mt5 — Cancelled pending order ticket=1518429982
+2026-03-06 13:50:27  INFO      mt5 — Placed sell_limit order: ticket=1518436658, symbol=XAUUSD, lot=0.85, price=5167.89, sl=5173.11
+2026-03-06 13:50:27  INFO      sync — Placed sell_limit: ticket=1518436658, symbol=XAUUSD, lot=0.85, price=5167.89000 (db=5168.00000, offset=+0.00000, spread=0.11000), sl=5173.11000, limit_id=239, signal_id=97
+2026-03-06 13:51:49  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-06 13:51:50  INFO      __main__ — Shutting down...
+2026-03-06 13:51:50  INFO      db — Supabase connection pool closed.
+2026-03-06 13:51:50  INFO      mt5 — MT5 disconnected.
+2026-03-06 13:51:50  INFO      __main__ — Shutdown complete.

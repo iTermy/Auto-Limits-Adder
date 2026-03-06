@@ -464,6 +464,51 @@ def close_position(ticket: int, lot_size: float, symbol: str, comment: str = "")
     return True
 
 
+def modify_position_sl(ticket: int, new_sl: float, symbol: str) -> bool:
+    """
+    Update the stop-loss on an open position without changing anything else.
+
+    Used when the signal's stop_loss is edited after a limit has already filled
+    (e.g. sender edits the Discord message to tighten/widen SL).
+
+    Returns True on success, False on failure.
+    """
+    positions = mt5.positions_get(ticket=ticket)
+    if not positions:
+        logger.warning(f"modify_position_sl: ticket {ticket} not found in open positions.")
+        return False
+
+    pos    = positions[0]
+    info   = mt5.symbol_info(symbol)
+    digits = info.digits if info else 5
+
+    rounded_sl = round(new_sl, digits)
+    if pos.sl and round(pos.sl, digits) == rounded_sl:
+        logger.debug(f"modify_position_sl: ticket {ticket} SL already at {rounded_sl} — no change needed.")
+        return True
+
+    request = {
+        "action":   mt5.TRADE_ACTION_SLTP,
+        "position": ticket,
+        "sl":       rounded_sl,
+        "tp":       pos.tp,
+    }
+    result = mt5.order_send(request)
+    if result is None or result.retcode != mt5.TRADE_RETCODE_DONE:
+        retcode = result.retcode if result else "None"
+        logger.error(
+            f"modify_position_sl failed: ticket={ticket}, symbol={symbol}, "
+            f"new_sl={rounded_sl}, retcode={retcode}"
+        )
+        return False
+
+    logger.info(
+        f"Updated SL on position ticket={ticket} ({symbol}): "
+        f"{pos.sl:.5f} → {rounded_sl:.5f}"
+    )
+    return True
+
+
 def set_trailing_stop(ticket: int, trail_points: int, symbol: str) -> bool:
     """
     Set (or update) a trailing stop on an open position.

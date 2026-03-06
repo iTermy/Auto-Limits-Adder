@@ -279,6 +279,9 @@ class SyncEngine:
 
         self.risk_percent = self.execution.get("risk_percent", 5.0)
         self.min_lot      = self.execution.get("min_lot", 0.01)
+        # How often (seconds) to recheck lot sizes + spread on live pending orders.
+        # Runs on a separate timer from offset readjustment.  Default 300s (5 min).
+        self.lot_recheck_interval: float = self.execution.get("lot_recheck_interval_seconds", 300)
 
         # Proximity filter — limits farther than this many pips from current price
         # are deferred (not placed in MT5) until price comes within range.
@@ -293,7 +296,8 @@ class SyncEngine:
             k.lower(): v for k, v in prox_cfg.get("per_asset_class", {}).items()
         }
 
-        self._last_readjust: float = 0.0   # monotonic time of last readjust pass
+        self._last_readjust:    float = 0.0   # monotonic time of last offset readjust pass
+        self._last_lot_recheck: float = 0.0   # monotonic time of last lot-size recheck pass
 
     # ------------------------------------------------------------------
     # Proximity filter
@@ -346,7 +350,9 @@ class SyncEngine:
     async def run_cycle(self) -> None:
         try:
             await self._sync_orders()
+            await self._sync_filled_position_sls()
             await self._maybe_readjust_offset_orders()
+            await self._maybe_recheck_lot_sizes()
             await self._detect_fills()
             self.tp_engine.run_tick()
         except Exception as exc:
@@ -409,6 +415,24 @@ class SyncEngine:
 
         # Limit_ids sitting in the deferred table (too far from price to place yet).
         deferred_limit_ids = local_db.get_deferred_limit_ids()
+
+        # ------------------------------------------------------------------
+        # Pre-compute average SL distance per signal (DB price space).
+        #
+        # The pip distance from entry to SL is identical in DB space and MT5
+        # space (offset cancels out between the two prices), so we size lots
+        # using the raw DB prices.  Using the *average* distance across all
+        # pending limits of a signal makes every limit receive the same lot
+        # size, so the combined risk of the full signal equals risk_percent.
+        # ------------------------------------------------------------------
+        avg_sl_distance_by_signal: dict[int, float] = {}
+        for signal in signals:
+            pending_lims = signal.get("pending_limits", [])
+            if not pending_lims:
+                continue
+            db_sl = signal["stop_loss"]
+            distances = [abs(lim["price_level"] - db_sl) for lim in pending_lims]
+            avg_sl_distance_by_signal[signal["id"]] = sum(distances) / len(distances)
 
         # ------------------------------------------------------------------
         # Place missing orders / re-evaluate deferred limits
@@ -482,7 +506,10 @@ class SyncEngine:
                     local_db.remove_deferred_limit(limit_id)
                     deferred_limit_ids.discard(limit_id)
 
-            await self._place_order_for_limit(lim, signal)
+            await self._place_order_for_limit(
+                lim, signal,
+                avg_sl_distance=avg_sl_distance_by_signal.get(signal["id"]),
+            )
 
         # ------------------------------------------------------------------
         # Cancel orders for limits no longer pending in DB
@@ -527,7 +554,243 @@ class SyncEngine:
                         f"removed {removed} deferred limit(s)."
                     )
 
-    async def _place_order_for_limit(self, lim: dict, signal: dict) -> None:
+
+    # ------------------------------------------------------------------
+    # SL sync for already-filled positions
+    # ------------------------------------------------------------------
+
+    async def _sync_filled_position_sls(self) -> None:
+        """
+        When a signal's stop_loss is edited (e.g. sender updates the Discord
+        message after a limit has already filled), the open MT5 position still
+        carries the old SL.  This method detects that drift and updates the
+        SL on every affected open position.
+
+        Logic per filled mapping whose signal is still active/hit:
+          1. Fetch the current stop_loss from the DB signal row.
+          2. Compute what the MT5-space SL should be (apply feed offset for
+             indices/crypto, plus spread adjustment matching the original
+             direction).
+          3. Compare to last_known_mt5_sl stored in orders.db.
+          4. If different beyond one pip, call mt5_api.modify_position_sl()
+             and update last_known_mt5_sl in local DB.
+        """
+        active_signals = await supabase_db.fetch_active_signals(self.pool)
+        if not active_signals:
+            return
+
+        active_by_id = {s["id"]: s for s in active_signals}
+        active_signal_ids = list(active_by_id.keys())
+
+        filled_mappings = local_db.get_filled_mappings_by_signal_ids(active_signal_ids)
+        if not filled_mappings:
+            return
+
+        for mapping in filled_mappings:
+            signal_id = mapping["signal_id"]
+            ticket    = mapping["mt5_ticket"]
+            signal    = active_by_id.get(signal_id)
+            if signal is None:
+                continue
+
+            instrument = signal["instrument"]
+            symbol     = map_instrument_to_symbol(instrument, self.symbol_map)
+            direction  = signal["direction"]
+            db_sl      = signal["stop_loss"]
+
+            # --- Translate DB stop_loss into MT5 price space ---
+            offset = 0.0
+            if needs_feed_offset(instrument):
+                computed = await get_feed_offset(
+                    self.pool, instrument, symbol, self.max_staleness,
+                )
+                if computed is None:
+                    continue
+                offset = computed
+
+            spread = mt5_api.get_current_spread(symbol)
+            if spread is None:
+                spread = 0.0
+
+            if direction == "long":
+                mt5_sl = db_sl + offset - spread
+            else:
+                mt5_sl = db_sl + offset + spread
+
+            last_known = mapping.get("last_known_mt5_sl")
+
+            # On first run after migration, seed last_known_mt5_sl from MT5
+            # so we only update on a genuine future change.
+            if last_known is None:
+                positions = mt5_api.get_open_positions()
+                live_pos  = next((p for p in positions if p["ticket"] == ticket), None)
+                if live_pos is None:
+                    continue
+                current_mt5_sl = live_pos.get("sl", 0.0) or 0.0
+                local_db.update_known_mt5_sl(ticket, db_sl, current_mt5_sl)
+                continue  # Seed only; evaluate on the next cycle.
+
+            pip_size = mt5_api.pips_to_price(1.0, symbol)
+            if pip_size <= 0:
+                pip_size = 0.00001
+
+            if abs(mt5_sl - last_known) < pip_size:
+                continue
+
+            logger.info(
+                f"SL change detected for signal {signal_id}, ticket {ticket} "
+                f"({symbol}): last_known_mt5_sl={last_known:.5f} -> new_mt5_sl={mt5_sl:.5f} "
+                f"(db_sl={db_sl:.5f}, offset={offset:+.5f})"
+            )
+
+            success = mt5_api.modify_position_sl(ticket, mt5_sl, symbol)
+            if success:
+                local_db.update_known_mt5_sl(ticket, db_sl, mt5_sl)
+
+
+    # ------------------------------------------------------------------
+    # Lot size + spread recheck
+    # ------------------------------------------------------------------
+
+    async def _maybe_recheck_lot_sizes(self) -> None:
+        """Gate: only runs every lot_recheck_interval seconds."""
+        if time.monotonic() - self._last_lot_recheck < self.lot_recheck_interval:
+            return
+        self._last_lot_recheck = time.monotonic()
+        await self._recheck_lot_sizes()
+
+    async def _recheck_lot_sizes(self) -> None:
+        """
+        For every live pending order, recompute what the lot size should be
+        given the current account balance and live spread.  If it differs from
+        the stored lot_size by at least one volume step, cancel and re-place
+        the order so risk stays anchored to risk_percent at all times.
+
+        This catches balance changes (profits, deposits, withdrawals) and
+        spread changes that have drifted since the order was originally placed.
+        Lot size and spread are both recomputed fresh on each pass.
+        """
+        pending_mappings = local_db.get_pending_mappings()
+        if not pending_mappings:
+            return
+
+        logger.debug(f"Lot-size recheck: {len(pending_mappings)} pending order(s).")
+
+        account = mt5_api.get_account_info()
+        if account is None:
+            logger.warning("Lot-size recheck: cannot get account info — skipping.")
+            return
+
+        for mapping in pending_mappings:
+            limit_id  = mapping["limit_id"]
+            ticket    = mapping["mt5_ticket"]
+            stored_lots = mapping.get("lot_size") or 0.0
+
+            # Fetch fresh limit + signal data from DB
+            lim_row = await supabase_db.fetch_limit_by_id(self.pool, limit_id)
+            if lim_row is None or lim_row.get("status") != "pending":
+                continue  # Limit gone / hit — _sync_orders will handle it
+
+            instrument = lim_row["instrument"]
+            symbol     = map_instrument_to_symbol(instrument, self.symbol_map)
+            direction  = lim_row["direction"]
+            db_sl      = lim_row["stop_loss"]
+            db_price   = lim_row["price_level"]
+            num_limits = lim_row.get("total_limits", 1) or 1
+
+            # --- Compute avg SL distance across sibling pending limits ---
+            sibling_limits = await supabase_db.fetch_pending_limits_for_signal(
+                self.pool, lim_row["signal_id"]
+            )
+            if sibling_limits:
+                distances = [abs(l["price_level"] - db_sl) for l in sibling_limits]
+                avg_sl_distance = sum(distances) / len(distances)
+            else:
+                avg_sl_distance = abs(db_price - db_sl)
+
+            # --- Fresh lot size with current balance and spread ---
+            # Apply feed offset so spread is fetched against the right MT5 symbol
+            offset = 0.0
+            if needs_feed_offset(instrument):
+                computed = await get_feed_offset(
+                    self.pool, instrument, symbol, self.max_staleness,
+                )
+                if computed is None:
+                    logger.debug(
+                        f"Lot recheck: stale live_prices for {instrument} "
+                        f"(ticket {ticket}) — skipping this cycle."
+                    )
+                    continue
+                offset = computed
+
+            spread = mt5_api.get_current_spread(symbol)
+            if spread is None:
+                spread = 0.0
+
+            # Spread shifts the effective entry price but cancels out between
+            # entry and SL (both shift the same direction), so avg_sl_distance
+            # in DB space is still the right risk distance.  We pass it directly.
+            new_lots = mt5_api.calculate_lot_size(
+                account_balance=account.balance,
+                risk_percent=self.risk_percent,
+                num_limits=num_limits,
+                sl_distance_price=avg_sl_distance,
+                symbol=symbol,
+                min_lot=self.min_lot,
+            )
+
+            # Only re-place if the difference is at least one volume step
+            info = mt5_api.mt5.symbol_info(symbol)
+            vol_step = (info.volume_step if info and info.volume_step > 0
+                        else self.min_lot)
+
+            if abs(new_lots - stored_lots) < vol_step:
+                logger.debug(
+                    f"Lot recheck ticket {ticket} ({symbol}): "
+                    f"stored={stored_lots}, new={new_lots} — within one step, no change."
+                )
+                continue
+
+            logger.info(
+                f"Lot-size drift detected for ticket {ticket} ({symbol}): "
+                f"stored={stored_lots} → new={new_lots} "
+                f"(balance={account.balance:.2f}, avg_sl_dist={avg_sl_distance:.5f}) "
+                f"— cancelling and re-placing."
+            )
+
+            cancelled = mt5_api.cancel_pending_order(ticket)
+            if not cancelled:
+                logger.warning(
+                    f"Lot recheck: could not cancel ticket {ticket} "
+                    f"— may have just filled, skipping."
+                )
+                continue
+
+            local_db.mark_cancelled(ticket)
+
+            # Re-place via the standard path (recomputes spread + offset fresh)
+            signal_stub = {
+                "id":           lim_row["signal_id"],
+                "instrument":   instrument,
+                "direction":    direction,
+                "stop_loss":    db_sl,
+                "total_limits": num_limits,
+            }
+            lim_stub = {
+                "id":          lim_row["id"],
+                "signal_id":   lim_row["signal_id"],
+                "price_level": db_price,
+            }
+            await self._place_order_for_limit(
+                lim_stub, signal_stub, avg_sl_distance=avg_sl_distance
+            )
+
+    async def _place_order_for_limit(
+        self,
+        lim: dict,
+        signal: dict,
+        avg_sl_distance: Optional[float] = None,
+    ) -> None:
         """
         Place a single pending order for a limit level.
 
@@ -639,9 +902,15 @@ class SyncEngine:
 
         order_type = mt5_api.resolve_order_type(direction, mt5_order_price, mt5_mid_now)
 
-        # Lot sizing uses the spread-adjusted prices — this is the true risk
-        # distance in MT5 price space (entry to SL, both on their trigger sides).
-        sl_distance = abs(mt5_order_price - mt5_sl)
+        # Lot sizing: use avg_sl_distance (pre-computed across all pending limits
+        # of this signal) so every limit in the signal gets the same lot size
+        # and the combined risk equals risk_percent.  Falls back to this limit's
+        # own SL distance if no average was provided (e.g. single-limit signal).
+        if avg_sl_distance is not None:
+            sl_distance = avg_sl_distance  # DB price space — offset cancels between entry/SL
+        else:
+            # Spread-adjusted prices give the true MT5 risk distance for a single limit.
+            sl_distance = abs(mt5_order_price - mt5_sl)
 
         account = mt5_api.get_account_info()
         if account is None:
@@ -684,6 +953,7 @@ class SyncEngine:
             mt5_ticket=ticket,
             order_type=mt5_api.order_type_to_str(order_type),
             lot_size=lot_size,
+            db_stop_loss=signal["stop_loss"],
         )
 
         if use_offset and feed_mid is not None and mt5_mid is not None:
@@ -775,7 +1045,10 @@ class SyncEngine:
 
             local_db.mark_cancelled(mapping["mt5_ticket"])
 
-            # Reconstruct minimal dicts to re-use _place_order_for_limit
+            # Reconstruct minimal dicts to re-use _place_order_for_limit.
+            # Re-compute the average SL distance across all currently-pending
+            # limits of this signal so the re-placed order keeps the same
+            # equal lot sizing as the original batch.
             signal_stub = {
                 "id":           lim_row["signal_id"],
                 "instrument":   lim_row["instrument"],
@@ -788,7 +1061,19 @@ class SyncEngine:
                 "signal_id":   lim_row["signal_id"],
                 "price_level": lim_row["price_level"],
             }
-            await self._place_order_for_limit(lim_stub, signal_stub)
+
+            # Fetch sibling pending limits to recompute average SL distance.
+            sibling_limits = await supabase_db.fetch_pending_limits_for_signal(
+                self.pool, lim_row["signal_id"]
+            )
+            db_sl = lim_row["stop_loss"]
+            if sibling_limits:
+                distances = [abs(l["price_level"] - db_sl) for l in sibling_limits]
+                avg_sl_distance = sum(distances) / len(distances)
+            else:
+                avg_sl_distance = abs(lim_row["price_level"] - db_sl)
+
+            await self._place_order_for_limit(lim_stub, signal_stub, avg_sl_distance=avg_sl_distance)
 
     # ------------------------------------------------------------------
     # Fill detection
