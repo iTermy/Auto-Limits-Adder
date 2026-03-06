@@ -52,6 +52,19 @@ CREATE TABLE IF NOT EXISTS order_mappings (
 
 CREATE INDEX IF NOT EXISTS idx_om_signal_id ON order_mappings(signal_id);
 CREATE INDEX IF NOT EXISTS idx_om_status    ON order_mappings(status);
+
+-- Limits that exist in the DB but are too far from current price to place yet.
+-- They are re-evaluated every cycle. When price comes within range they are
+-- removed from here and a real order is placed (inserted into order_mappings).
+-- No MT5 ticket is associated with a deferred limit.
+CREATE TABLE IF NOT EXISTS deferred_limits (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    limit_id    BIGINT NOT NULL UNIQUE,
+    signal_id   BIGINT NOT NULL,
+    deferred_at TEXT NOT NULL    -- ISO timestamp of when we first deferred this limit
+);
+
+CREATE INDEX IF NOT EXISTS idx_dl_signal_id ON deferred_limits(signal_id);
 """
 
 
@@ -291,3 +304,56 @@ def get_pending_offset_mappings(db_path: str = DB_PATH) -> list[dict]:
     with get_connection(db_path) as conn:
         rows = conn.execute(sql).fetchall()
     return [_row_to_dict(r) for r in rows]
+
+# ---------------------------------------------------------------------------
+# Deferred-limit helpers (proximity filter)
+# ---------------------------------------------------------------------------
+
+def upsert_deferred_limit(limit_id: int, signal_id: int, db_path: str = DB_PATH) -> None:
+    """
+    Record a limit that is too far from current price to place yet.
+    Uses INSERT OR IGNORE so re-encountering the same limit is a no-op.
+    """
+    sql = """
+        INSERT OR IGNORE INTO deferred_limits (limit_id, signal_id, deferred_at)
+        VALUES (?, ?, ?)
+    """
+    with get_connection(db_path) as conn:
+        conn.execute(sql, (limit_id, signal_id, _now_iso()))
+        conn.commit()
+
+
+def remove_deferred_limit(limit_id: int, db_path: str = DB_PATH) -> None:
+    """Remove a limit from the deferred table (it is now being placed)."""
+    with get_connection(db_path) as conn:
+        conn.execute("DELETE FROM deferred_limits WHERE limit_id = ?", (limit_id,))
+        conn.commit()
+
+
+def get_deferred_limit_ids(db_path: str = DB_PATH) -> set[int]:
+    """Return the set of limit_ids currently sitting in the deferred table."""
+    with get_connection(db_path) as conn:
+        rows = conn.execute("SELECT limit_id FROM deferred_limits").fetchall()
+    return {r["limit_id"] for r in rows}
+
+
+def cancel_all_deferred_for_signal(signal_id: int, db_path: str = DB_PATH) -> int:
+    """
+    Remove all deferred limits for a signal (called when the signal goes inactive).
+    Returns the count of rows removed.
+    """
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "DELETE FROM deferred_limits WHERE signal_id = ?", (signal_id,)
+        )
+        conn.commit()
+    return cur.rowcount
+
+
+def get_all_deferred_signal_ids(db_path: str = DB_PATH) -> set[int]:
+    """Return all distinct signal_ids that have at least one deferred limit."""
+    with get_connection(db_path) as conn:
+        rows = conn.execute(
+            "SELECT DISTINCT signal_id FROM deferred_limits"
+        ).fetchall()
+    return {r["signal_id"] for r in rows}

@@ -19861,3 +19861,1066 @@ asyncpg.exceptions.ConnectionDoesNotExistError: connection was closed in the mid
 2026-03-05 21:57:08  INFO      db — Supabase connection pool closed.
 2026-03-05 21:57:08  INFO      mt5 — MT5 disconnected.
 2026-03-05 21:57:08  INFO      __main__ — Shutdown complete.
+2026-03-05 22:03:51  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-05 22:03:51  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-05 22:03:51  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-05 22:03:51  INFO      __main__ — Connecting to MT5...
+2026-03-05 22:03:51  INFO      mt5 — MT5 connected — account 52447107, balance 9932.29 USD, server ICMarketsEU-Demo
+2026-03-05 22:03:51  INFO      __main__ — Connecting to Supabase...
+2026-03-05 22:03:51  INFO      db — Supabase connection pool created.
+2026-03-05 22:03:51  INFO      sync — Running startup reconciliation...
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887499 (limit_id=374) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887521 (limit_id=375) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887537 (limit_id=376) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887554 (limit_id=377) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887567 (limit_id=378) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887579 (limit_id=400) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887586 (limit_id=401) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887593 (limit_id=402) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887600 (limit_id=403) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887605 (limit_id=404) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887610 (limit_id=405) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887615 (limit_id=406) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887624 (limit_id=442) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887630 (limit_id=443) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887634 (limit_id=444) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887639 (limit_id=445) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887647 (limit_id=446) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887652 (limit_id=447) -> CANCELLED externally
+2026-03-05 22:03:51  INFO      sync — Reconcile: ticket 1516887661 (limit_id=448) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887666 (limit_id=449) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887670 (limit_id=450) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887677 (limit_id=451) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887681 (limit_id=452) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887690 (limit_id=453) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887693 (limit_id=454) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887696 (limit_id=461) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887699 (limit_id=462) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887702 (limit_id=463) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887704 (limit_id=464) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887706 (limit_id=465) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887712 (limit_id=466) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887716 (limit_id=491) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887718 (limit_id=492) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887720 (limit_id=493) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887721 (limit_id=494) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887724 (limit_id=495) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887726 (limit_id=559) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887727 (limit_id=560) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887728 (limit_id=561) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887729 (limit_id=562) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887730 (limit_id=563) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887732 (limit_id=564) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887733 (limit_id=565) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887736 (limit_id=566) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887778 (limit_id=615) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887894 (limit_id=616) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887901 (limit_id=617) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887911 (limit_id=618) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887926 (limit_id=619) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887937 (limit_id=620) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887948 (limit_id=621) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887956 (limit_id=622) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516887972 (limit_id=623) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888005 (limit_id=624) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888008 (limit_id=625) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888011 (limit_id=626) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888013 (limit_id=662) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888016 (limit_id=663) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888023 (limit_id=671) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888028 (limit_id=672) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888030 (limit_id=673) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888032 (limit_id=674) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888034 (limit_id=675) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888038 (limit_id=676) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888042 (limit_id=677) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888044 (limit_id=678) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888048 (limit_id=679) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888051 (limit_id=680) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888052 (limit_id=681) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888055 (limit_id=682) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888061 (limit_id=683) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888063 (limit_id=684) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888065 (limit_id=685) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888066 (limit_id=686) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888068 (limit_id=687) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888072 (limit_id=688) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888073 (limit_id=689) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888078 (limit_id=690) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888082 (limit_id=691) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888085 (limit_id=692) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888089 (limit_id=693) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888093 (limit_id=723) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888099 (limit_id=724) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888101 (limit_id=725) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888104 (limit_id=726) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888109 (limit_id=727) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888111 (limit_id=728) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888112 (limit_id=729) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888113 (limit_id=730) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888115 (limit_id=731) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888121 (limit_id=732) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888122 (limit_id=803) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888130 (limit_id=804) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888131 (limit_id=805) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888135 (limit_id=806) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888143 (limit_id=807) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888151 (limit_id=808) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888157 (limit_id=809) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888160 (limit_id=829) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888162 (limit_id=830) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888165 (limit_id=823) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888166 (limit_id=824) -> CANCELLED externally
+2026-03-05 22:03:52  INFO      sync — Reconcile: ticket 1516888167 (limit_id=825) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888169 (limit_id=826) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888182 (limit_id=827) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888187 (limit_id=828) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888192 (limit_id=831) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888200 (limit_id=832) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888208 (limit_id=833) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888211 (limit_id=834) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888216 (limit_id=840) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888223 (limit_id=841) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888228 (limit_id=842) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888233 (limit_id=843) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888238 (limit_id=844) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888243 (limit_id=845) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888247 (limit_id=846) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888251 (limit_id=847) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888254 (limit_id=875) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888256 (limit_id=876) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888258 (limit_id=877) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888263 (limit_id=890) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888266 (limit_id=891) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888271 (limit_id=892) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888272 (limit_id=893) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888284 (limit_id=894) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888289 (limit_id=903) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888292 (limit_id=904) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888296 (limit_id=905) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888299 (limit_id=899) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888302 (limit_id=900) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888307 (limit_id=901) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888324 (limit_id=902) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888337 (limit_id=906) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888347 (limit_id=907) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888355 (limit_id=908) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888379 (limit_id=909) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888409 (limit_id=910) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888435 (limit_id=911) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888491 (limit_id=912) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888509 (limit_id=913) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888520 (limit_id=914) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888528 (limit_id=915) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888542 (limit_id=916) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888560 (limit_id=917) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888570 (limit_id=918) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888576 (limit_id=919) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888587 (limit_id=920) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888591 (limit_id=932) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888599 (limit_id=933) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516888604 (limit_id=934) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516907984 (limit_id=747) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516907993 (limit_id=748) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908003 (limit_id=749) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908007 (limit_id=750) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908010 (limit_id=751) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908049 (limit_id=752) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908051 (limit_id=753) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908053 (limit_id=754) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908056 (limit_id=755) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908059 (limit_id=756) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908060 (limit_id=757) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908062 (limit_id=758) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908063 (limit_id=759) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908064 (limit_id=760) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908068 (limit_id=761) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908071 (limit_id=762) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908073 (limit_id=763) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908075 (limit_id=773) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908077 (limit_id=774) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908078 (limit_id=775) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908080 (limit_id=776) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908081 (limit_id=777) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908083 (limit_id=784) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908084 (limit_id=785) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908086 (limit_id=786) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908087 (limit_id=787) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908088 (limit_id=788) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908093 (limit_id=870) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908150 (limit_id=871) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908152 (limit_id=872) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Reconcile: ticket 1516908160 (limit_id=873) -> CANCELLED externally
+2026-03-05 22:03:53  INFO      sync — Startup reconciliation complete.
+2026-03-05 22:03:53  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-05 22:04:16  INFO      mt5 — Placed sell_limit order: ticket=1516928033, symbol=AMZN.NAS-24, lot=76.9, price=231.66, sl=232.95
+2026-03-05 22:04:16  INFO      sync — Placed sell_limit: ticket=1516928033, symbol=AMZN.NAS-24, lot=76.9, price=231.66000 (db=231.66000, offset=+0.00000), sl=232.95000, limit_id=874, signal_id=265
+2026-03-05 22:04:16  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:16  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:16  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:16  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:16  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:16  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:16  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:16  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:16  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:16  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:16  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:16  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:04:16  INFO      mt5 — Placed sell_limit order: ticket=1516928285, symbol=EURUSD, lot=0.56, price=1.1735, sl=1.17571
+2026-03-05 22:04:16  INFO      sync — Placed sell_limit: ticket=1516928285, symbol=EURUSD, lot=0.56, price=1.17350 (db=1.17350, offset=+0.00000), sl=1.17571, limit_id=943, signal_id=281
+2026-03-05 22:04:16  INFO      mt5 — Placed sell_limit order: ticket=1516928359, symbol=EURUSD, lot=0.65, price=1.1738, sl=1.17571
+2026-03-05 22:04:16  INFO      sync — Placed sell_limit: ticket=1516928359, symbol=EURUSD, lot=0.65, price=1.17380 (db=1.17380, offset=+0.00000), sl=1.17571, limit_id=944, signal_id=281
+2026-03-05 22:04:16  INFO      mt5 — Placed sell_limit order: ticket=1516928406, symbol=EURUSD, lot=0.77, price=1.1741, sl=1.17571
+2026-03-05 22:04:17  INFO      sync — Placed sell_limit: ticket=1516928406, symbol=EURUSD, lot=0.77, price=1.17410 (db=1.17410, offset=+0.00000), sl=1.17571, limit_id=945, signal_id=281
+2026-03-05 22:04:18  INFO      mt5 — Placed sell_limit order: ticket=1516928435, symbol=EURUSD, lot=1.14, price=1.17463, sl=1.17571
+2026-03-05 22:04:18  INFO      sync — Placed sell_limit: ticket=1516928435, symbol=EURUSD, lot=1.14, price=1.17463 (db=1.17463, offset=+0.00000), sl=1.17571, limit_id=946, signal_id=281
+2026-03-05 22:04:18  INFO      mt5 — Placed sell_limit order: ticket=1516928523, symbol=GBPUSD, lot=0.56, price=1.3489, sl=1.35181
+2026-03-05 22:04:18  INFO      sync — Placed sell_limit: ticket=1516928523, symbol=GBPUSD, lot=0.56, price=1.34890 (db=1.34890, offset=+0.00000), sl=1.35181, limit_id=940, signal_id=282
+2026-03-05 22:04:21  INFO      mt5 — Placed sell_limit order: ticket=1516928554, symbol=GBPUSD, lot=0.82, price=1.34981, sl=1.35181
+2026-03-05 22:04:21  INFO      sync — Placed sell_limit: ticket=1516928554, symbol=GBPUSD, lot=0.82, price=1.34981 (db=1.34981, offset=+0.00000), sl=1.35181, limit_id=941, signal_id=282
+2026-03-05 22:04:21  INFO      mt5 — Placed sell_limit order: ticket=1516928607, symbol=GBPUSD, lot=1.31, price=1.35055, sl=1.35181
+2026-03-05 22:04:21  INFO      sync — Placed sell_limit: ticket=1516928607, symbol=GBPUSD, lot=1.31, price=1.35055 (db=1.35055, offset=+0.00000), sl=1.35181, limit_id=942, signal_id=282
+2026-03-05 22:04:21  INFO      mt5 — Placed sell_limit order: ticket=1516928619, symbol=EURUSD, lot=1.26, price=1.1693, sl=1.17061
+2026-03-05 22:04:21  INFO      sync — Placed sell_limit: ticket=1516928619, symbol=EURUSD, lot=1.26, price=1.16930 (db=1.16930, offset=+0.00000), sl=1.17061, limit_id=947, signal_id=283
+2026-03-05 22:04:22  INFO      mt5 — Placed sell_limit order: ticket=1516928629, symbol=EURUSD, lot=1.7, price=1.16964, sl=1.17061
+2026-03-05 22:04:22  INFO      sync — Placed sell_limit: ticket=1516928629, symbol=EURUSD, lot=1.7, price=1.16964 (db=1.16964, offset=+0.00000), sl=1.17061, limit_id=948, signal_id=283
+2026-03-05 22:04:22  INFO      mt5 — Placed sell_limit order: ticket=1516928641, symbol=EURUSD, lot=2.09, price=1.16982, sl=1.17061
+2026-03-05 22:04:22  INFO      sync — Placed sell_limit: ticket=1516928641, symbol=EURUSD, lot=2.09, price=1.16982 (db=1.16982, offset=+0.00000), sl=1.17061, limit_id=949, signal_id=283
+2026-03-05 22:04:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:04:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:04:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:04:44  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:44  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:44  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:44  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:44  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:44  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:44  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:44  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:44  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:44  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:44  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:44  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:04:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:04:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:04:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:04:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:04:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:04:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:04:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:04:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:18  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:18  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:18  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:18  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:18  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:18  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:18  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:18  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:18  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:18  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:18  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:18  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:23  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:23  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:23  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:23  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:23  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:23  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:23  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:23  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:23  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:23  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:23  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:23  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:29  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:29  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:29  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:29  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:29  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:29  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:29  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:29  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:29  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:29  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:29  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:29  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:34  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:34  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:34  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:34  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:34  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:34  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:34  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:34  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:34  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:34  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:34  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:34  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:40  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:40  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:40  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:40  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:40  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:40  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:40  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:40  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:40  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:40  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:40  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:40  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:46  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:46  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:46  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:46  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:46  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:46  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:46  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:46  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:46  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:46  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:46  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:46  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:51  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:51  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:51  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:51  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:51  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:51  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:51  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:51  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:51  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:51  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:51  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:51  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:05:57  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:57  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:05:57  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:57  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:05:57  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:57  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:05:57  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:57  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:05:57  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:57  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:05:57  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:05:57  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:02  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:02  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:02  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:02  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:02  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:02  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:02  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:02  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:02  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:02  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:02  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:02  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:08  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:08  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:08  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:08  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:08  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:08  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:08  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:08  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:08  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:08  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:08  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:08  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:13  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:13  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:13  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:13  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:13  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:13  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:13  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:13  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:13  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:13  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:13  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:13  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:19  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:19  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:19  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:19  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:19  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:19  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:19  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:19  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:19  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:19  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:19  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:19  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:24  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:24  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:24  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:24  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:24  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:24  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:24  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:24  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:24  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:24  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:24  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:24  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:30  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:30  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:30  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:30  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:30  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:30  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:30  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:30  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:30  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:30  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:30  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:30  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:36  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:36  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:36  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:36  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:36  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:36  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:36  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:36  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:36  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:36  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:36  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:36  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:41  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:41  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:41  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:41  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:41  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:41  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:41  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:41  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:41  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:41  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:41  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:41  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:47  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:47  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:47  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:47  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:47  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:47  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:47  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:47  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:47  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:47  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:47  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:47  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:52  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:52  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:52  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:52  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:52  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:52  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:52  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:52  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:52  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:52  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:52  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:52  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:06:58  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:58  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:06:58  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:58  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:06:58  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:58  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:06:58  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:58  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:06:58  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:58  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:06:58  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:06:58  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:03  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:03  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:03  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:03  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:03  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:03  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:03  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:03  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:03  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:03  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:03  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:03  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:09  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:09  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:09  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:09  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:09  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:09  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:09  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:09  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:09  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:09  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:09  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:09  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:14  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:14  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:14  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:14  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:14  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:14  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:14  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:14  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:14  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:14  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:14  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:14  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:20  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:20  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:20  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:20  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:20  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:20  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:20  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:20  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:20  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:20  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:20  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:20  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:26  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:26  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:26  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:26  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:26  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:26  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:26  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:26  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:26  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:26  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:26  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:26  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:31  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:31  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:31  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:31  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:31  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:31  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:31  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:31  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:31  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:31  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:31  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:31  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:37  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:37  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:37  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:37  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:37  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:37  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:37  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:37  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:37  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:37  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:37  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:37  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:42  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:42  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:42  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:42  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:42  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:42  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:42  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:42  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:42  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:42  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:42  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:42  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:48  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:48  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:48  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:48  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:48  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:48  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:48  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:48  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:48  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:48  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:48  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:48  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:53  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:53  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:53  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:53  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:53  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:53  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:53  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:53  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:53  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:53  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:53  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:53  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:07:59  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:59  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:07:59  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:59  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:07:59  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:59  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:07:59  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:59  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:07:59  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:59  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:07:59  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:07:59  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:04  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:04  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:04  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:04  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:04  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:04  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:04  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:04  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:04  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:04  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:04  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:04  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:10  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:10  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:10  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:10  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:10  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:10  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:10  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:10  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:10  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:10  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:10  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:10  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:15  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:15  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:15  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:15  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:15  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:15  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:15  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:15  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:15  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:15  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:15  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:15  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:21  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:21  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:21  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:21  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:21  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:21  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:21  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:21  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:21  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:21  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:21  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:21  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:27  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:27  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:27  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:27  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:27  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:27  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:27  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:27  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:27  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:27  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:27  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:27  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:32  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:32  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:32  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:32  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:32  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:32  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:32  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:32  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:32  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:32  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:32  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:32  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:38  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:38  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:38  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:38  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:38  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:38  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:38  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:38  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:38  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:38  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:38  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:38  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:43  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:43  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:43  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:43  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:43  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:43  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:43  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:43  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:43  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:43  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:43  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:43  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:49  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:49  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:49  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:49  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:49  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:49  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:49  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:49  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:49  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:49  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:49  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:49  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:08:54  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:54  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:08:54  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:54  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:08:54  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:54  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:08:54  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:54  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:08:54  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:54  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:08:54  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:08:54  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:00  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:00  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:00  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:00  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:00  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:00  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:00  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:00  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:00  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:00  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:00  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:00  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:06  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:06  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:06  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:06  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:06  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:06  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:06  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:06  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:06  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:06  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:06  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:06  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:11  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:11  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:11  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:11  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:11  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:11  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:11  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:11  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:11  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:11  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:11  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:11  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:17  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:17  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:17  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:17  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:17  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:17  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:17  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:17  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:17  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:17  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:17  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:17  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:22  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:22  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:22  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:22  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:22  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:22  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:22  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:22  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:22  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:22  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:22  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:22  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:28  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:28  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:33  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:33  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:39  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:39  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:45  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:45  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:45  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:45  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:45  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:45  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:45  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:45  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:45  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:45  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:45  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:45  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:50  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:50  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:09:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:09:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:09:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:09:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:09:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:09:56  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:09:56  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:10:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:10:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:10:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:10:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:10:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:10:01  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:01  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:10:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:10:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:10:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:10:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:10:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:10:07  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:07  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:10:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 884
+2026-03-05 22:10:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 885
+2026-03-05 22:10:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 886
+2026-03-05 22:10:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 887
+2026-03-05 22:10:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 888
+2026-03-05 22:10:12  WARNING   mt5 — No tick data for USOILSPOT: (-4, 'Terminal: Not found')
+2026-03-05 22:10:12  WARNING   sync — Cannot get MT5 price for USOILSPOT — skipping limit 889
+2026-03-05 22:10:16  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-05 22:10:16  INFO      __main__ — Shutting down...
+2026-03-05 22:10:16  INFO      db — Supabase connection pool closed.
+2026-03-05 22:10:16  INFO      mt5 — MT5 disconnected.
+2026-03-05 22:10:16  INFO      __main__ — Shutdown complete.
+2026-03-05 22:10:19  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-05 22:10:19  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-05 22:10:19  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-05 22:10:19  INFO      __main__ — Connecting to MT5...
+2026-03-05 22:10:19  INFO      mt5 — MT5 connected — account 52447107, balance 9932.29 USD, server ICMarketsEU-Demo
+2026-03-05 22:10:19  INFO      __main__ — Connecting to Supabase...
+2026-03-05 22:10:20  INFO      db — Supabase connection pool created.
+2026-03-05 22:10:20  INFO      sync — Running startup reconciliation...
+2026-03-05 22:10:20  INFO      sync — Startup reconciliation complete.
+2026-03-05 22:10:20  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-05 22:11:31  INFO      mt5 — Placed sell_limit order: ticket=1516936167, symbol=XAUUSD, lot=0.14, price=5167.2, sl=5176.0
+2026-03-05 22:11:31  INFO      sync — Placed sell_limit: ticket=1516936167, symbol=XAUUSD, lot=0.14, price=5167.20000 (db=5167.20000, offset=+0.00000), sl=5176.00000, limit_id=950, signal_id=279
+2026-03-05 22:11:31  INFO      mt5 — Placed sell_limit order: ticket=1516936207, symbol=XAUUSD, lot=0.17, price=5168.7, sl=5176.0
+2026-03-05 22:11:31  INFO      sync — Placed sell_limit: ticket=1516936207, symbol=XAUUSD, lot=0.17, price=5168.70000 (db=5168.70000, offset=+0.00000), sl=5176.00000, limit_id=951, signal_id=279
+2026-03-05 22:11:32  INFO      mt5 — Placed sell_limit order: ticket=1516936235, symbol=XAUUSD, lot=0.2, price=5170.0, sl=5176.0
+2026-03-05 22:11:32  INFO      sync — Placed sell_limit: ticket=1516936235, symbol=XAUUSD, lot=0.2, price=5170.00000 (db=5170.00000, offset=+0.00000), sl=5176.00000, limit_id=952, signal_id=279
+2026-03-05 22:11:32  INFO      mt5 — Placed sell_limit order: ticket=1516936238, symbol=XAUUSD, lot=0.24, price=5171.0, sl=5176.0
+2026-03-05 22:11:32  INFO      sync — Placed sell_limit: ticket=1516936238, symbol=XAUUSD, lot=0.24, price=5171.00000 (db=5171.00000, offset=+0.00000), sl=5176.00000, limit_id=953, signal_id=279
+2026-03-05 22:11:38  INFO      mt5 — Placed sell_limit order: ticket=1516936273, symbol=XAUUSD, lot=0.13, price=5167.2, sl=5176.2
+2026-03-05 22:11:38  INFO      sync — Placed sell_limit: ticket=1516936273, symbol=XAUUSD, lot=0.13, price=5167.20000 (db=5167.20000, offset=+0.00000), sl=5176.20000, limit_id=954, signal_id=279
+2026-03-05 22:11:38  INFO      mt5 — Placed sell_limit order: ticket=1516936294, symbol=XAUUSD, lot=0.16, price=5168.7, sl=5176.2
+2026-03-05 22:11:38  INFO      sync — Placed sell_limit: ticket=1516936294, symbol=XAUUSD, lot=0.16, price=5168.70000 (db=5168.70000, offset=+0.00000), sl=5176.20000, limit_id=955, signal_id=279
+2026-03-05 22:11:39  INFO      mt5 — Placed sell_limit order: ticket=1516936299, symbol=XAUUSD, lot=0.2, price=5170.0, sl=5176.2
+2026-03-05 22:11:39  INFO      sync — Placed sell_limit: ticket=1516936299, symbol=XAUUSD, lot=0.2, price=5170.00000 (db=5170.00000, offset=+0.00000), sl=5176.20000, limit_id=956, signal_id=279
+2026-03-05 22:11:39  INFO      mt5 — Placed sell_limit order: ticket=1516936306, symbol=XAUUSD, lot=0.24, price=5171.2, sl=5176.2
+2026-03-05 22:11:39  INFO      sync — Placed sell_limit: ticket=1516936306, symbol=XAUUSD, lot=0.24, price=5171.20000 (db=5171.20000, offset=+0.00000), sl=5176.20000, limit_id=957, signal_id=279
+2026-03-05 22:11:39  INFO      sync — Limit 950 no longer pending in DB — cancelling ticket 1516936167
+2026-03-05 22:11:39  INFO      mt5 — Cancelled pending order ticket=1516936167
+2026-03-05 22:11:39  INFO      sync — Limit 951 no longer pending in DB — cancelling ticket 1516936207
+2026-03-05 22:11:39  INFO      mt5 — Cancelled pending order ticket=1516936207
+2026-03-05 22:11:39  INFO      sync — Limit 952 no longer pending in DB — cancelling ticket 1516936235
+2026-03-05 22:11:39  INFO      mt5 — Cancelled pending order ticket=1516936235
+2026-03-05 22:11:39  INFO      sync — Limit 953 no longer pending in DB — cancelling ticket 1516936238
+2026-03-05 22:11:39  INFO      mt5 — Cancelled pending order ticket=1516936238
+2026-03-05 22:14:01  INFO      mt5 — Placed sell_limit order: ticket=1516938528, symbol=XAUUSD, lot=0.27, price=5195.0, sl=5204.0
+2026-03-05 22:14:01  INFO      sync — Placed sell_limit: ticket=1516938528, symbol=XAUUSD, lot=0.27, price=5195.00000 (db=5195.00000, offset=+0.00000), sl=5204.00000, limit_id=958, signal_id=284
+2026-03-05 22:14:02  INFO      mt5 — Placed sell_limit order: ticket=1516938538, symbol=XAUUSD, lot=0.49, price=5199.0, sl=5204.0
+2026-03-05 22:14:02  INFO      sync — Placed sell_limit: ticket=1516938538, symbol=XAUUSD, lot=0.49, price=5199.00000 (db=5199.00000, offset=+0.00000), sl=5204.00000, limit_id=959, signal_id=284
+2026-03-05 22:23:08  INFO      mt5 — Placed sell_limit order: ticket=1516949111, symbol=XAUUSD, lot=0.4, price=5233.3, sl=5239.4
+2026-03-05 22:23:08  INFO      sync — Placed sell_limit: ticket=1516949111, symbol=XAUUSD, lot=0.4, price=5233.30000 (db=5233.30000, offset=+0.00000), sl=5239.40000, limit_id=960, signal_id=285
+2026-03-05 22:23:09  INFO      mt5 — Placed sell_limit order: ticket=1516949208, symbol=XAUUSD, lot=0.49, price=5234.4, sl=5239.4
+2026-03-05 22:23:09  INFO      sync — Placed sell_limit: ticket=1516949208, symbol=XAUUSD, lot=0.49, price=5234.40000 (db=5234.40000, offset=+0.00000), sl=5239.40000, limit_id=961, signal_id=285
+2026-03-05 23:32:54  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-05 23:32:54  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-05 23:32:54  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-05 23:32:54  INFO      __main__ — Connecting to MT5...
+2026-03-05 23:32:54  INFO      mt5 — MT5 connected — account 52447107, balance 9930.39 USD, server ICMarketsEU-Demo
+2026-03-05 23:32:54  INFO      __main__ — Connecting to Supabase...
+2026-03-05 23:32:54  INFO      db — Supabase connection pool created.
+2026-03-05 23:32:54  INFO      sync — Running startup reconciliation...
+2026-03-05 23:32:54  INFO      sync — Reconcile: ticket 1516994571 (limit_id=219) -> CANCELLED externally
+2026-03-05 23:32:54  INFO      sync — Startup reconciliation complete.
+2026-03-05 23:32:54  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-05 23:32:59  INFO      mt5 — Placed sell_limit order: ticket=1517003483, symbol=XAUUSD, lot=0.18, price=5195.0, sl=5204.0
+2026-03-05 23:32:59  INFO      sync — Placed sell_limit: ticket=1517003483, symbol=XAUUSD, lot=0.18, price=5195.00000 (db=5195.00000, offset=+0.00000), sl=5204.00000, limit_id=971, signal_id=284
+2026-03-05 23:32:59  INFO      mt5 — Placed sell_limit order: ticket=1517003549, symbol=XAUUSD, lot=0.24, price=5197.2, sl=5204.0
+2026-03-05 23:32:59  INFO      sync — Placed sell_limit: ticket=1517003549, symbol=XAUUSD, lot=0.24, price=5197.20000 (db=5197.20000, offset=+0.00000), sl=5204.00000, limit_id=972, signal_id=284
+2026-03-05 23:33:00  INFO      mt5 — Placed sell_limit order: ticket=1517003557, symbol=XAUUSD, lot=0.33, price=5199.0, sl=5204.0
+2026-03-05 23:33:00  INFO      sync — Placed sell_limit: ticket=1517003557, symbol=XAUUSD, lot=0.33, price=5199.00000 (db=5199.00000, offset=+0.00000), sl=5204.00000, limit_id=973, signal_id=284
+2026-03-05 23:33:00  INFO      mt5 — Placed sell_limit order: ticket=1517003581, symbol=XAUUSD, lot=0.14, price=5253.7, sl=5262.5
+2026-03-05 23:33:00  INFO      sync — Placed sell_limit: ticket=1517003581, symbol=XAUUSD, lot=0.14, price=5253.70000 (db=5253.70000, offset=+0.00000), sl=5262.50000, limit_id=965, signal_id=286
+2026-03-05 23:33:00  INFO      mt5 — Placed sell_limit order: ticket=1517003648, symbol=XAUUSD, lot=0.14, price=5254.2, sl=5262.5
+2026-03-05 23:33:00  INFO      sync — Placed sell_limit: ticket=1517003648, symbol=XAUUSD, lot=0.14, price=5254.20000 (db=5254.20000, offset=+0.00000), sl=5262.50000, limit_id=966, signal_id=286
+2026-03-05 23:33:00  INFO      mt5 — Placed sell_limit order: ticket=1517003674, symbol=XAUUSD, lot=0.22, price=5257.1, sl=5262.5
+2026-03-05 23:33:00  INFO      sync — Placed sell_limit: ticket=1517003674, symbol=XAUUSD, lot=0.22, price=5257.10000 (db=5257.10000, offset=+0.00000), sl=5262.50000, limit_id=967, signal_id=286
+2026-03-05 23:33:01  INFO      mt5 — Placed sell_limit order: ticket=1517003699, symbol=XAUUSD, lot=0.24, price=5257.5, sl=5262.5
+2026-03-05 23:33:01  INFO      sync — Placed sell_limit: ticket=1517003699, symbol=XAUUSD, lot=0.24, price=5257.50000 (db=5257.50000, offset=+0.00000), sl=5262.50000, limit_id=968, signal_id=286
+2026-03-05 23:33:01  INFO      mt5 — Placed sell_limit order: ticket=1517003723, symbol=XAUUSD, lot=0.36, price=5290.7, sl=5297.5
+2026-03-05 23:33:01  INFO      sync — Placed sell_limit: ticket=1517003723, symbol=XAUUSD, lot=0.36, price=5290.70000 (db=5290.70000, offset=+0.00000), sl=5297.50000, limit_id=969, signal_id=287
+2026-03-05 23:33:09  INFO      mt5 — Placed sell_limit order: ticket=1517003760, symbol=XAUUSD, lot=0.49, price=5292.5, sl=5297.5
+2026-03-05 23:33:09  INFO      sync — Placed sell_limit: ticket=1517003760, symbol=XAUUSD, lot=0.49, price=5292.50000 (db=5292.50000, offset=+0.00000), sl=5297.50000, limit_id=970, signal_id=287
+2026-03-05 23:34:44  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-05 23:34:44  INFO      __main__ — Shutting down...
+2026-03-05 23:34:44  INFO      db — Supabase connection pool closed.
+2026-03-05 23:34:44  INFO      mt5 — MT5 disconnected.
+2026-03-05 23:34:44  INFO      __main__ — Shutdown complete.

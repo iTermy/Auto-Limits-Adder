@@ -2,9 +2,9 @@
   "poll_interval_seconds": 5,
   "filters": {
     "instruments": {
-      "mode": "all",
+      "mode": "exclude",
       "list": [
-        "XAUUSD"
+        "USOILSPOT"
       ]
     },
     "asset_classes": {
@@ -17,6 +17,20 @@
     "directions": "both",
     "scalp_signals": true,
     "signal_types": "all"
+  },
+  "proximity_filter": {
+    "enabled": false,
+    "default_pips": 500,
+    "per_asset_class": {
+      "metals":  500,
+      "forex":   200,
+      "indices": 1000,
+      "crypto":  2000,
+      "stocks":  300
+    },
+    "per_instrument": {
+      "XAUUSD": 500
+    }
   },
   "execution": {
     "risk_percent": 5.0,

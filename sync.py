@@ -263,7 +263,64 @@ class SyncEngine:
         self.risk_percent = self.execution.get("risk_percent", 5.0)
         self.min_lot      = self.execution.get("min_lot", 0.01)
 
+        # Proximity filter — limits farther than this many pips from current price
+        # are deferred (not placed in MT5) until price comes within range.
+        # A value of 0 or None disables the filter entirely.
+        prox_cfg = config.get("proximity_filter", {})
+        self.proximity_enabled = prox_cfg.get("enabled", False)
+        self.proximity_default_pips: float = prox_cfg.get("default_pips", 0.0)
+        self.proximity_per_instrument: dict = {
+            k.upper(): v for k, v in prox_cfg.get("per_instrument", {}).items()
+        }
+        self.proximity_per_asset_class: dict = {
+            k.lower(): v for k, v in prox_cfg.get("per_asset_class", {}).items()
+        }
+
         self._last_readjust: float = 0.0   # monotonic time of last readjust pass
+
+    # ------------------------------------------------------------------
+    # Proximity filter
+    # ------------------------------------------------------------------
+
+    def _get_proximity_threshold_pips(self, instrument: str) -> float:
+        """
+        Return the maximum pip distance from current price at which we will place
+        a pending order for this instrument. 0 means no limit (disabled).
+
+        Lookup priority: per_instrument > per_asset_class > default.
+        """
+        upper = instrument.upper()
+        if upper in self.proximity_per_instrument:
+            return float(self.proximity_per_instrument[upper])
+        asset_class = get_asset_class(instrument)
+        if asset_class in self.proximity_per_asset_class:
+            return float(self.proximity_per_asset_class[asset_class])
+        return float(self.proximity_default_pips)
+
+    def _is_within_proximity(
+        self,
+        db_price: float,
+        current_mt5_mid: float,
+        symbol: str,
+        instrument: str,
+    ) -> bool:
+        """
+        Return True if the limit's price (already translated to MT5 space) is
+        within the configured pip threshold of the current MT5 mid price.
+
+        Always returns True when the proximity filter is disabled or threshold is 0.
+        """
+        if not self.proximity_enabled:
+            return True
+
+        threshold_pips = self._get_proximity_threshold_pips(instrument)
+        if threshold_pips <= 0:
+            return True
+
+        distance_pips = mt5_api.price_to_pips(
+            abs(db_price - current_mt5_mid), symbol
+        )
+        return distance_pips <= threshold_pips
 
     # ------------------------------------------------------------------
     # Main cycle
@@ -329,23 +386,90 @@ class SyncEngine:
         local_pending  = local_db.get_pending_mappings()
         local_by_limit = {m["limit_id"]: m for m in local_pending}
 
-        # Also collect all tracked limit_ids (any status) to guard against re-placing
-        # an order whose DB write failed mid-cycle last time.
+        # All limit_ids already tracked in order_mappings (any status).
+        # Used to guard against re-placing when a mid-cycle DB write failed.
         all_tracked_limit_ids = local_db.get_all_tracked_limit_ids()
 
-        # Place missing orders
+        # Limit_ids sitting in the deferred table (too far from price to place yet).
+        deferred_limit_ids = local_db.get_deferred_limit_ids()
+
+        # ------------------------------------------------------------------
+        # Place missing orders / re-evaluate deferred limits
+        # ------------------------------------------------------------------
         for limit_id, lim in db_pending.items():
             if limit_id in local_by_limit:
-                continue
+                continue  # Already have a live pending order — nothing to do.
             if limit_id in all_tracked_limit_ids:
-                # Already have a mapping (filled/cancelled) — don't re-place
-                continue
+                continue  # Has a mapping (filled / cancelled) — don't re-place.
+
             signal = db_signals.get(lim["signal_id"])
             if signal is None:
                 continue
+
+            # ---- Proximity check -----------------------------------------
+            if self.proximity_enabled:
+                instrument = signal["instrument"]
+                symbol     = map_instrument_to_symbol(instrument, self.symbol_map)
+                db_price   = lim["price_level"]
+
+                # For offset instruments we need the translated MT5 price to
+                # compute distance accurately. We fetch the offset here so we
+                # can reuse it; if unavailable we fall back to the raw DB price
+                # (the pip distance is the same regardless of offset).
+                mt5_order_price = db_price
+                if needs_feed_offset(instrument):
+                    computed = await get_feed_offset(
+                        self.pool, instrument, symbol, self.max_staleness,
+                    )
+                    if computed is not None:
+                        mt5_order_price = db_price + computed
+
+                prices = mt5_api.get_current_price(symbol)
+                if prices is not None:
+                    mt5_mid = (prices[0] + prices[1]) / 2.0
+                    in_range = self._is_within_proximity(
+                        mt5_order_price, mt5_mid, symbol, instrument
+                    )
+                else:
+                    # Can't get price — treat as in-range and let _place_order_for_limit
+                    # handle the failure gracefully.
+                    in_range = True
+
+                if not in_range:
+                    threshold = self._get_proximity_threshold_pips(instrument)
+                    distance  = mt5_api.price_to_pips(
+                        abs(mt5_order_price - mt5_mid), symbol
+                    ) if prices else float("nan")
+
+                    if limit_id not in deferred_limit_ids:
+                        logger.info(
+                            f"Limit {limit_id} ({instrument} @ {db_price:.5f}) is "
+                            f"{distance:.1f} pips away (threshold {threshold:.1f}) — "
+                            f"deferring until price comes within range."
+                        )
+                        local_db.upsert_deferred_limit(limit_id, signal["id"])
+                        deferred_limit_ids.add(limit_id)
+                    else:
+                        logger.debug(
+                            f"Limit {limit_id} still deferred ({distance:.1f} pips, "
+                            f"threshold {threshold:.1f})."
+                        )
+                    continue
+
+                # Price is now within range — remove from deferred table and place.
+                if limit_id in deferred_limit_ids:
+                    logger.info(
+                        f"Limit {limit_id} ({instrument}) has entered proximity range "
+                        f"— placing order now."
+                    )
+                    local_db.remove_deferred_limit(limit_id)
+                    deferred_limit_ids.discard(limit_id)
+
             await self._place_order_for_limit(lim, signal)
 
+        # ------------------------------------------------------------------
         # Cancel orders for limits no longer pending in DB
+        # ------------------------------------------------------------------
         for limit_id, mapping in local_by_limit.items():
             if limit_id not in db_pending:
                 ticket = mapping["mt5_ticket"]
@@ -353,16 +477,38 @@ class SyncEngine:
                 mt5_api.cancel_pending_order(ticket)
                 local_db.mark_cancelled(ticket)
 
-        # Cancel all orders for signals that left active/hit state
-        all_tracked = local_db.get_all_tracked_signal_ids()
-        active_ids  = {s["id"] for s in signals}
+        # ------------------------------------------------------------------
+        # Clean up deferred limits for limits no longer in DB
+        # ------------------------------------------------------------------
+        for limit_id in list(deferred_limit_ids):
+            if limit_id not in db_pending:
+                logger.info(
+                    f"Deferred limit {limit_id} no longer pending in DB — removing."
+                )
+                local_db.remove_deferred_limit(limit_id)
 
-        for signal_id in all_tracked:
+        # ------------------------------------------------------------------
+        # Cancel all orders / deferred entries for signals that left active/hit
+        # ------------------------------------------------------------------
+        all_tracked_signal_ids = local_db.get_all_tracked_signal_ids()
+        all_deferred_signal_ids = local_db.get_all_deferred_signal_ids()
+        active_ids = {s["id"] for s in signals}
+
+        for signal_id in all_tracked_signal_ids:
             if signal_id not in active_ids:
                 pending_tickets = local_db.cancel_all_pending_for_signal(signal_id)
                 for ticket in pending_tickets:
                     logger.info(f"Signal {signal_id} gone from active — cancelling ticket {ticket}")
                     mt5_api.cancel_pending_order(ticket)
+
+        for signal_id in all_deferred_signal_ids:
+            if signal_id not in active_ids:
+                removed = local_db.cancel_all_deferred_for_signal(signal_id)
+                if removed:
+                    logger.info(
+                        f"Signal {signal_id} gone from active — "
+                        f"removed {removed} deferred limit(s)."
+                    )
 
     async def _place_order_for_limit(self, lim: dict, signal: dict) -> None:
         """
