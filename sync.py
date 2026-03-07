@@ -509,6 +509,7 @@ class SyncEngine:
             await self._place_order_for_limit(
                 lim, signal,
                 avg_sl_distance=avg_sl_distance_by_signal.get(signal["id"]),
+                deferred_limit_ids=deferred_limit_ids,
             )
 
         # ------------------------------------------------------------------
@@ -834,6 +835,7 @@ class SyncEngine:
         lim: dict,
         signal: dict,
         avg_sl_distance: Optional[float] = None,
+        deferred_limit_ids: Optional[set] = None,
     ) -> None:
         """
         Place a single pending order for a limit level.
@@ -928,20 +930,36 @@ class SyncEngine:
             f"adjusted sl={mt5_sl:.5f}"
         )
 
-        # Skip if price already past the adjusted limit
+        # Skip if price already past the adjusted limit.
+        # 'Past' means price has blown through the entry in the wrong direction:
+        #   long  -> price is already below the buy limit (entry opportunity gone)
+        #   short -> price is already above the sell limit
+        # Tolerance of 0.5 pips gives a small buffer so limits just barely in range
+        # are not skipped.  When past, the limit is parked in deferred_limits so the
+        # warning fires only once; it is re-evaluated every cycle and placed
+        # automatically if price reverses back through the entry level.
         if self.execution.get("skip_if_price_past_limit", True):
             tolerance = mt5_api.pips_to_price(0.5, symbol)
             past = (
-                (direction == "long"  and mt5_mid_now <= mt5_order_price
-                 and abs(mt5_mid_now - mt5_order_price) < tolerance) or
-                (direction == "short" and mt5_mid_now >= mt5_order_price
-                 and abs(mt5_mid_now - mt5_order_price) < tolerance)
+                (direction == "long"  and mt5_mid_now < mt5_order_price - tolerance) or
+                (direction == "short" and mt5_mid_now > mt5_order_price + tolerance)
             )
             if past:
-                logger.warning(
-                    f"MT5 price {mt5_mid_now:.5f} already at/past adjusted limit "
-                    f"{mt5_order_price:.5f} for {symbol} — skipping limit {lim['id']}"
+                limit_id = lim["id"]
+                known_deferred = (
+                    deferred_limit_ids
+                    if deferred_limit_ids is not None
+                    else local_db.get_deferred_limit_ids()
                 )
+                if limit_id not in known_deferred:
+                    logger.warning(
+                        f"Price {mt5_mid_now:.5f} already past adjusted limit "
+                        f"{mt5_order_price:.5f} for {symbol} (limit {limit_id}) "
+                        f"— deferring until price reverses."
+                    )
+                    local_db.upsert_deferred_limit(limit_id, signal["id"])
+                    if deferred_limit_ids is not None:
+                        deferred_limit_ids.add(limit_id)
                 return
 
         order_type = mt5_api.resolve_order_type(direction, mt5_order_price, mt5_mid_now)
