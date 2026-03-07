@@ -29,6 +29,7 @@ import local_db
 import mt5 as mt5_api
 from sync import SyncEngine
 from tp import TPEngine, DefaultTPStrategy
+from license import validate_license, start_heartbeat
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -121,6 +122,33 @@ async def main() -> None:
     logger.info("Connecting to Supabase...")
     pool = await supabase_db.create_pool(db_url)
 
+    # -----------------------------------------------------------------------
+    # License validation
+    # -----------------------------------------------------------------------
+    license_cfg = config.get("license", {})
+    license_key = license_cfg.get("key", "").strip()
+    if not license_key:
+        logger.critical(
+            "No license key configured. "
+            "Add your key to config.json under \"license\": { \"key\": \"...\" }. "
+            "Run !activate in the Discord server to obtain a key."
+        )
+        await supabase_db.close_pool(pool)
+        mt5_api.disconnect()
+        sys.exit(1)
+
+    mt5_account = str(mt5_api.get_account_number())
+    logger.info(f"MT5 account: {mt5_account}")
+
+    if not await validate_license(pool, license_key, mt5_account):
+        logger.critical("License validation failed — exiting.")
+        await supabase_db.close_pool(pool)
+        mt5_api.disconnect()
+        sys.exit(1)
+
+    heartbeat_task = start_heartbeat(pool, license_key, mt5_account)
+    # -----------------------------------------------------------------------
+
     # Build engine stack
     strategy  = DefaultTPStrategy(config)
     tp_engine = TPEngine(config, strategy=strategy)
@@ -141,6 +169,8 @@ async def main() -> None:
                 await asyncio.sleep(0.1)
     finally:
         logger.info("Shutting down...")
+        if 'heartbeat_task' in locals() and not heartbeat_task.done():
+            heartbeat_task.cancel()
         await supabase_db.close_pool(pool)
         mt5_api.disconnect()
         logger.info("Shutdown complete.")

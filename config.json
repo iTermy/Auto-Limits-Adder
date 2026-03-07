@@ -80,5 +80,8 @@
     "max_staleness_seconds": 30,
     "offset_readjust_interval_seconds": 60,
     "offset_readjust_threshold_pips": 2.0
+  },
+  "license": {
+    "key": "eae859300e0971488ad245bf6bc56929"
   }
 }

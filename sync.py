@@ -349,6 +349,17 @@ class SyncEngine:
 
     async def run_cycle(self) -> None:
         try:
+            from license import is_license_valid
+            if not is_license_valid():
+                logger.warning(
+                    "License invalid — skipping order placement this cycle. "
+                    "TP engine and fill detection still running for open positions."
+                )
+                # Still run fill detection and TP so open positions are managed
+                await self._detect_fills()
+                self.tp_engine.run_tick()
+                return
+
             await self._sync_orders()
             await self._sync_filled_position_sls()
             await self._maybe_readjust_offset_orders()

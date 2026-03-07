@@ -82,6 +82,12 @@ def get_account_info() -> Optional[object]:
     return info
 
 
+def get_account_number() -> Optional[int]:
+    """Return the MT5 login number (account ID) for the active session, or None."""
+    info = get_account_info()
+    return info.login if info else None
+
+
 # ---------------------------------------------------------------------------
 # Symbol helpers
 # ---------------------------------------------------------------------------
