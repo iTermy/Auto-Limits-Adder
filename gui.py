@@ -132,8 +132,24 @@ def make_combobox(parent, values, width=18, **kwargs) -> ttk.Combobox:
         selectbackground=[("readonly", BG3)],
         selectforeground=[("readonly", FG)],
     )
-    return ttk.Combobox(parent, values=values, width=width, style="Dark.TCombobox",
-                        state="readonly", font=FONT_BODY, **kwargs)
+    cb = ttk.Combobox(parent, values=values, width=width, style="Dark.TCombobox",
+                      state="readonly", font=FONT_BODY, **kwargs)
+    # Style the dropdown listbox (requires post-creation option_add trick)
+    cb.bind("<Map>", lambda e, w=cb: _style_combobox_dropdown(w))
+    return cb
+
+def _style_combobox_dropdown(cb: ttk.Combobox):
+    """Apply dark theme to the dropdown list popup after the widget is mapped."""
+    try:
+        cb.tk.eval(f"""
+            set popdown [ttk::combobox::PopdownWindow {cb}]
+            $popdown.f.l configure -background {BG3} -foreground {FG} \\
+                -selectbackground {ACCENT} -selectforeground {FG} \\
+                -relief flat -borderwidth 0
+            $popdown configure -background {BORDER}
+        """)
+    except Exception:
+        pass
 
 def make_spinbox(parent, from_, to, increment=1.0, width=10, **kwargs) -> tk.Spinbox:
     return tk.Spinbox(
@@ -378,6 +394,55 @@ TP_SCALP_DEFAULTS = {
     "oil":       {"type": "dollars", "value": 0.2,  "trail": 0.1,  "description": "Scalp - Oil commodities"},
 }
 
+class _FixedVar:
+    """Mimics .get() interface of a combobox for read-only locked unit values."""
+    def __init__(self, value: str):
+        self._value = value
+    def get(self) -> str:
+        return self._value
+
+# Forex asset classes always use pips; everything else always uses dollars.
+_FOREX_CLASSES = {"forex", "forex_jpy"}
+
+def _forced_unit_for_class(cls: str) -> str | None:
+    """Return the forced unit string for a class, or None if user can choose."""
+    if cls in _FOREX_CLASSES:
+        return "pips"
+    # All non-forex asset classes are forced to dollars
+    if cls in TP_ASSET_CLASSES:
+        return "dollars"
+    return None
+
+def _forced_unit_for_instrument(instr: str) -> str | None:
+    """
+    Auto-detect forced unit from instrument name for override rows.
+    Returns 'pips' for forex-like names, 'dollars' for everything else, None if unknown.
+    """
+    if not instr:
+        return None
+    i = instr.upper()
+    # Crypto
+    if i.endswith("USDT") or i.endswith("BTC") or i in ("BTCUSD", "ETHUSD"):
+        return "dollars"
+    # Metals
+    if i in ("XAUUSD", "GOLD", "XAGUSD", "SILVER"):
+        return "dollars"
+    # Stocks
+    if ".NAS" in i or ".NYSE" in i:
+        return "dollars"
+    # Indices keywords
+    for kw in ("SPX", "NAS", "DAX", "JP225", "UK100", "DE30", "US500", "USTEC"):
+        if kw in i:
+            return "dollars"
+    # Oil
+    if "OIL" in i or "WTI" in i or "BRENT" in i:
+        return "dollars"
+    # Forex: 6 uppercase letters, no digits
+    if len(i) == 6 and i.isalpha():
+        return "pips"
+    return None
+
+
 class TPClassEditor(tk.Frame):
     """
     Displays a grid of rows for each TP asset class.
@@ -465,9 +530,18 @@ class TPClassEditor(tk.Frame):
         f.pack(fill="x", pady=1)
         tk.Label(f, text=cls, bg=BG3, fg=FG, font=FONT_BODY,
                  width=14, anchor="w").pack(side="left", padx=(6, 4))
-        cb_unit = make_combobox(f, ["pips", "dollars"], width=8)
-        cb_unit.set(unit)
-        cb_unit.pack(side="left", padx=(0, 4))
+
+        # Enforce unit: forex/forex_jpy = pips (locked), everything else = dollars (locked)
+        forced_unit = _forced_unit_for_class(cls)
+        if forced_unit:
+            tk.Label(f, text=forced_unit, bg=BG3, fg=FG_DIM, font=FONT_BODY,
+                     width=8, anchor="w").pack(side="left", padx=(0, 4))
+            cb_unit = _FixedVar(forced_unit)
+        else:
+            cb_unit = make_combobox(f, ["pips", "dollars"], width=8)
+            cb_unit.set(unit)
+            cb_unit.pack(side="left", padx=(0, 4))
+
         e_tp = make_entry(f, width=10)
         e_tp.insert(0, str(tp_val))
         e_tp.pack(side="left", padx=(0, 4))
@@ -487,10 +561,27 @@ class TPClassEditor(tk.Frame):
         f = tk.Frame(self._override_container, bg=BG3, pady=2)
         f.pack(fill="x", pady=1)
         e_instr = make_entry(f, width=10); e_instr.insert(0, instr); e_instr.pack(side="left", padx=(6,3))
-        cb  = make_combobox(f, ["pips","dollars"], width=7); cb.set(unit); cb.pack(side="left", padx=(0,3))
+
+        def _make_unit_widget(forced_unit, chosen_unit):
+            if forced_unit:
+                tk.Label(f, text=forced_unit, bg=BG3, fg=FG_DIM, font=FONT_BODY,
+                         width=7, anchor="w").pack(side="left", padx=(0,3))
+                return _FixedVar(forced_unit)
+            else:
+                cb = make_combobox(f, ["pips","dollars"], width=7)
+                cb.set(chosen_unit)
+                cb.pack(side="left", padx=(0,3))
+                return cb
+
+        def _on_instr_change(*_):
+            # Re-build is complex; we just use the initial instrument for auto-detect.
+            pass
+
+        forced = _forced_unit_for_instrument(instr)
+        cb  = _make_unit_widget(forced, unit)
         e_tp  = make_entry(f, width=6); e_tp.insert(0, str(tp)); e_tp.pack(side="left", padx=(0,3))
         e_tr  = make_entry(f, width=6); e_tr.insert(0, str(trail)); e_tr.pack(side="left", padx=(0,3))
-        cb_s  = make_combobox(f, ["pips","dollars"], width=7); cb_s.set(s_unit); cb_s.pack(side="left", padx=(0,3))
+        cb_s  = _make_unit_widget(forced, s_unit)
         e_stp = make_entry(f, width=6); e_stp.insert(0, str(s_tp)); e_stp.pack(side="left", padx=(0,3))
         e_str = make_entry(f, width=7); e_str.insert(0, str(s_trail)); e_str.pack(side="left", padx=(0,3))
         row_ref = {"frame": f, "instr": e_instr, "unit": cb, "tp": e_tp, "trail": e_tr,
