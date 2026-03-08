@@ -20,7 +20,7 @@
   },
   "proximity_filter": {
     "enabled": false,
-    "default_pips": 500,
+    "default_pips": 500.0,
     "per_asset_class": {
       "metals": 500,
       "forex": 200,
@@ -42,7 +42,7 @@
   "tp": {
     "profit_threshold": {
       "unit": "pips",
-      "default": 7,
+      "default": 7.0,
       "per_instrument": {
         "XAUUSD": 2.0
       },
@@ -52,7 +52,7 @@
     },
     "trail": {
       "unit": "pips",
-      "default": 3,
+      "default": 3.0,
       "per_instrument": {
         "XAUUSD": 2.0
       },

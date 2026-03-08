@@ -1,0 +1,40 @@
+2026-03-06 23:16:32  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 23:16:32  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 23:16:32  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 23:16:32  INFO      __main__ — Connecting to MT5...
+2026-03-06 23:16:47  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-06 23:16:47  INFO      __main__ — Connecting to Supabase...
+2026-03-06 23:16:52  INFO      db — Supabase connection pool created.
+2026-03-06 23:16:52  INFO      __main__ — MT5 account: 52776073
+2026-03-06 23:16:53  ERROR     license — License DB query failed: relation "licenses" does not exist
+2026-03-06 23:16:53  CRITICAL  __main__ — License validation failed — exiting.
+2026-03-06 23:16:54  INFO      db — Supabase connection pool closed.
+2026-03-06 23:16:54  INFO      mt5 — MT5 disconnected.
+2026-03-06 23:17:25  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 23:17:25  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 23:17:25  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 23:17:25  INFO      __main__ — Connecting to MT5...
+2026-03-06 23:17:25  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-06 23:17:25  INFO      __main__ — Connecting to Supabase...
+2026-03-06 23:17:29  INFO      db — Supabase connection pool created.
+2026-03-06 23:17:29  INFO      __main__ — MT5 account: 52776073
+2026-03-06 23:17:31  INFO      license — License validated OK (MT5: 52776073).
+2026-03-06 23:17:31  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
+2026-03-06 23:17:31  INFO      sync — Running startup reconciliation...
+2026-03-06 23:17:31  INFO      sync — No pending local mappings to reconcile.
+2026-03-06 23:17:31  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-06 23:18:35  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-06 23:18:36  INFO      __main__ — Shutting down...
+2026-03-06 23:18:36  INFO      db — Supabase connection pool closed.
+2026-03-06 23:18:36  INFO      mt5 — MT5 disconnected.
+2026-03-06 23:18:36  INFO      __main__ — Shutdown complete.
+2026-03-06 23:18:40  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-06 23:18:40  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-06 23:18:40  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-06 23:18:40  INFO      __main__ — Connecting to MT5...
+2026-03-06 23:18:40  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-06 23:18:40  INFO      __main__ — Connecting to Supabase...
+2026-03-06 23:18:44  INFO      db — Supabase connection pool created.
+2026-03-06 23:18:44  CRITICAL  __main__ — No license key configured. Add your key to config.json under "license": { "key": "..." }. Run !activate in the Discord server to obtain a key.
+2026-03-06 23:18:45  INFO      db — Supabase connection pool closed.
+2026-03-06 23:18:45  INFO      mt5 — MT5 disconnected.
