@@ -29,7 +29,7 @@ import local_db
 import mt5 as mt5_api
 from sync import SyncEngine
 from tp import TPEngine, DefaultTPStrategy
-from license import validate_license, start_heartbeat
+from license import validate_license, start_heartbeat, get_discord_id
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -131,7 +131,15 @@ async def main() -> None:
 
     # Build engine stack
     strategy  = DefaultTPStrategy(config)
-    tp_engine = TPEngine(config, strategy=strategy)
+    tp_engine = TPEngine(
+        config,
+        strategy    = strategy,
+        pool        = pool,
+        mt5_account = mt5_account,
+        discord_id  = get_discord_id() or "",
+        license_key = license_key,
+        bot_version = "1.0.0",
+    )
     sync      = SyncEngine(pool, config, tp_engine)
 
     # Startup reconciliation

@@ -45,7 +45,7 @@
   "tp": {
     "defaults": {
       "forex": {
-        "type": "dollars",
+        "type": "pips",
         "value": 5.0,
         "trail": 3.0,
         "description": "Standard forex pairs"
@@ -149,6 +149,6 @@
     "offset_readjust_threshold_pips": 2.0
   },
   "license": {
-    "key": "eae859300e0971488ad245bf6bc56929"
+    "key": ""
   }
 }

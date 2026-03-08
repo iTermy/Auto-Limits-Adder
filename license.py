@@ -51,6 +51,7 @@ logger = logging.getLogger(__name__)
 
 _license_valid: bool = True   # Assume valid until proven otherwise
 _heartbeat_task: Optional[asyncio.Task] = None
+_discord_id: Optional[str] = None  # Resolved on first successful validation
 
 
 def is_license_valid() -> bool:
@@ -59,6 +60,11 @@ def is_license_valid() -> bool:
     Called by SyncEngine before placing any new orders.
     """
     return _license_valid
+
+
+def get_discord_id() -> Optional[str]:
+    """Return the discord_id bound to the validated license key."""
+    return _discord_id
 
 
 # ---------------------------------------------------------------------------
@@ -93,7 +99,7 @@ async def validate_license(
     try:
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
-                "SELECT status, mt5_account FROM licenses WHERE license_key = $1",
+                "SELECT status, mt5_account, discord_id FROM licenses WHERE license_key = $1",
                 license_key,
             )
     except Exception as exc:
@@ -122,7 +128,9 @@ async def validate_license(
         )
         return False
 
-    logger.info(f"License validated OK (MT5: {mt5_account}).")
+    global _discord_id
+    _discord_id = str(row["discord_id"]) if row["discord_id"] else None
+    logger.info(f"License validated OK (MT5: {mt5_account}, discord_id: {_discord_id}).")
     return True
 
 

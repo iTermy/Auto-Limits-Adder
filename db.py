@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # This role has SELECT-only access on: signals, limits, live_prices, licenses.
 # It cannot INSERT, UPDATE, DELETE, or access any other table.
 # Rotate this password via Supabase dashboard → Database → Roles if compromised.
-_RO_DSN = "postgresql://execution_bot_ro:oS$95chu86HanS@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
+_RO_DSN = ""
 
 
 # ---------------------------------------------------------------------------
@@ -245,3 +245,93 @@ async def fetch_live_prices_bulk(
     async with pool.acquire() as conn:
         rows = await conn.fetch(query, symbols)
     return {r["symbol"]: _record_to_dict(r) for r in rows}
+
+
+# ---------------------------------------------------------------------------
+# License helpers
+# ---------------------------------------------------------------------------
+
+async def fetch_discord_id_for_license(
+    pool: asyncpg.Pool, license_key: str
+) -> Optional[str]:
+    """Return the discord_id associated with a license key, or None."""
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT discord_id FROM licenses WHERE license_key = $1",
+            license_key,
+        )
+    return row["discord_id"] if row else None
+
+
+# ---------------------------------------------------------------------------
+# TP outcomes — the only table the execution bot INSERTs into
+# ---------------------------------------------------------------------------
+
+async def insert_tp_outcome(pool: asyncpg.Pool, outcome: dict) -> bool:
+    """
+    Insert one row into tp_outcomes.
+
+    Required keys in `outcome`:
+        mt5_account, discord_id, license_key,
+        mt5_ticket, symbol, db_instrument, asset_class, direction,
+        outcome (one of: tp_partial, tp_trail_close, sl, breakeven_close, manual_close)
+
+    Optional / nullable keys:
+        signal_id, is_scalp, fill_price, close_price, lot_size,
+        pnl_dollars, pnl_pips, tp_type, tp_threshold_value,
+        tp_trail_amount, tp_partial_close_pct, tp_config_source,
+        filled_at, bot_version
+
+    Returns True on success, False on error.
+    """
+    query = """
+        INSERT INTO tp_outcomes (
+            mt5_account, discord_id, license_key,
+            signal_id, mt5_ticket, symbol, db_instrument, asset_class,
+            direction, is_scalp, outcome,
+            fill_price, close_price, lot_size, pnl_dollars, pnl_pips,
+            tp_type, tp_threshold_value, tp_trail_amount,
+            tp_partial_close_pct, tp_config_source,
+            filled_at, closed_at, bot_version
+        ) VALUES (
+            $1,  $2,  $3,
+            $4,  $5,  $6,  $7,  $8,
+            $9,  $10, $11,
+            $12, $13, $14, $15, $16,
+            $17, $18, $19,
+            $20, $21,
+            $22, NOW(), $23
+        )
+    """
+    try:
+        async with pool.acquire() as conn:
+            await conn.execute(
+                query,
+                outcome.get("mt5_account"),
+                outcome.get("discord_id"),
+                outcome.get("license_key"),
+                outcome.get("signal_id"),
+                outcome.get("mt5_ticket"),
+                outcome.get("symbol"),
+                outcome.get("db_instrument"),
+                outcome.get("asset_class"),
+                outcome.get("direction"),
+                outcome.get("is_scalp", False),
+                outcome.get("outcome"),
+                outcome.get("fill_price"),
+                outcome.get("close_price"),
+                outcome.get("lot_size"),
+                outcome.get("pnl_dollars"),
+                outcome.get("pnl_pips"),
+                outcome.get("tp_type"),
+                outcome.get("tp_threshold_value"),
+                outcome.get("tp_trail_amount"),
+                outcome.get("tp_partial_close_pct"),
+                outcome.get("tp_config_source"),
+                outcome.get("filled_at"),
+                outcome.get("bot_version"),
+            )
+        return True
+    except Exception as exc:
+        logger.error(f"insert_tp_outcome failed: {exc}")
+        return False

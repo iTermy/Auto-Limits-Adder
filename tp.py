@@ -43,10 +43,12 @@ import logging
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Optional
 
 import mt5 as mt5_api
 import local_db
+import db as supabase_db
 
 logger = logging.getLogger(__name__)
 
@@ -338,15 +340,30 @@ class TPEngine:
     Manages all open positions and drives the TP strategy on each tick.
 
     Usage:
-        engine = TPEngine(config)
+        engine = TPEngine(config, pool=pool, mt5_account="123", discord_id="456",
+                          license_key="abc...", strategy=DefaultTPStrategy(config))
         engine.register_position(ticket, mapping)  # called by sync on fill
         engine.run_tick()                           # called every poll cycle
     """
 
-    def __init__(self, config: dict, strategy: BaseTPStrategy = None):
-        self.config   = config
-        self.strategy = strategy or DefaultTPStrategy(config)
-        self.symbol_map = config.get("symbol_map", {})
+    def __init__(
+        self,
+        config: dict,
+        strategy: BaseTPStrategy = None,
+        pool=None,
+        mt5_account: str = "",
+        discord_id: str = "",
+        license_key: str = "",
+        bot_version: str = "",
+    ):
+        self.config      = config
+        self.strategy    = strategy or DefaultTPStrategy(config)
+        self.symbol_map  = config.get("symbol_map", {})
+        self.pool        = pool
+        self.mt5_account = mt5_account
+        self.discord_id  = discord_id
+        self.license_key = license_key
+        self.bot_version = bot_version
 
         # ticket → {ticket, signal_id, limit_id, symbol, lot_size, ...}
         self._positions: dict[int, dict] = {}
@@ -402,7 +419,15 @@ class TPEngine:
         # Detect positions that closed outside our control
         closed_tickets = [t for t in list(self._positions) if t not in live_positions]
         for ticket in closed_tickets:
-            logger.info(f"TPEngine: position {ticket} closed externally — removing from tracker.")
+            pos = self._positions.get(ticket, {})
+            # If this ticket was in the trailing phase, it's a trail close (trail stop hit)
+            in_trailing = hasattr(self.strategy, "_trailing") and ticket in self.strategy._trailing
+            outcome_type = "tp_trail_close" if in_trailing else "manual_close"
+            logger.info(
+                f"TPEngine: position {ticket} closed externally "
+                f"(outcome={outcome_type}) — removing from tracker."
+            )
+            self._record_outcome_sync(ticket, pos, outcome_type, close_price=None)
             self._remove_position(ticket)
 
         # Group open positions by signal_id for sibling awareness
@@ -477,6 +502,13 @@ class TPEngine:
             logger.info(f"TPEngine: closing full position ticket={ticket} ({symbol}). Reason: {action.reason}")
             success = mt5_api.close_position(ticket, position["volume"], symbol, comment="tp_full")
             if success:
+                # Determine outcome: breakeven_close or sl
+                outcome_type = "breakeven_close"
+                if "stop" in action.reason.lower() or "sl" in action.reason.lower():
+                    outcome_type = "sl"
+                prices = mt5_api.get_current_price(symbol)
+                close_price = (prices[0] if position.get("type") == 0 else prices[1]) if prices else None
+                self._record_outcome_sync(ticket, position, outcome_type, close_price=close_price, context=context)
                 self._remove_position(ticket)
 
         elif action.action == "close_partial":
@@ -485,10 +517,14 @@ class TPEngine:
                 f"lots={action.close_lots}. Reason: {action.reason}"
             )
             success = mt5_api.close_position(ticket, action.close_lots, symbol, comment="tp_partial")
-            if success and action.trail_pips > 0:
-                # Set initial trailing stop
-                trail_points = int(action.trail_pips * self._get_pip_points(symbol))
-                mt5_api.set_trailing_stop(ticket, trail_points, symbol)
+            if success:
+                prices = mt5_api.get_current_price(symbol)
+                close_price = (prices[0] if position.get("type") == 0 else prices[1]) if prices else None
+                self._record_outcome_sync(ticket, position, "tp_partial", close_price=close_price, context=context)
+                if action.trail_pips > 0:
+                    # Set initial trailing stop
+                    trail_points = int(action.trail_pips * self._get_pip_points(symbol))
+                    mt5_api.set_trailing_stop(ticket, trail_points, symbol)
 
         elif action.action == "trail":
             trail_points = int(action.trail_pips * self._get_pip_points(symbol))
@@ -506,6 +542,137 @@ class TPEngine:
         except Exception:
             pass
         return 10   # safe default for 5-digit brokers
+
+    # ------------------------------------------------------------------
+    # Outcome recording
+    # ------------------------------------------------------------------
+
+    def _record_outcome_sync(
+        self,
+        ticket: int,
+        position: dict,
+        outcome_type: str,
+        close_price: Optional[float] = None,
+        context: Optional[TPContext] = None,
+    ) -> None:
+        """
+        Fire-and-forget: schedule an asyncio task to INSERT into tp_outcomes.
+        Safe to call from synchronous run_tick() context.
+        """
+        if not self.pool:
+            return
+
+        try:
+            import asyncio
+            loop = asyncio.get_event_loop()
+            loop.create_task(
+                self._record_outcome(ticket, position, outcome_type, close_price, context)
+            )
+        except RuntimeError:
+            pass  # No running event loop — skip recording
+
+    async def _record_outcome(
+        self,
+        ticket: int,
+        position: dict,
+        outcome_type: str,
+        close_price: Optional[float] = None,
+        context: Optional[TPContext] = None,
+    ) -> None:
+        """Build and insert a tp_outcomes row."""
+        symbol = position.get("symbol", "")
+        lot_size = position.get("volume", position.get("lot_size"))
+        fill_price = position.get("price_open")
+        signal_id = position.get("signal_id")
+        is_scalp = bool(position.get("is_scalp", False))
+        direction = "long" if position.get("type", 0) == 0 else "short"
+
+        # Map MT5 symbol back to DB instrument name (reverse symbol_map)
+        reverse_map = {v.upper(): k for k, v in self.symbol_map.items()}
+        db_instrument = reverse_map.get(symbol.upper(), symbol)
+
+        asset_class = _detect_tp_asset_class(symbol)
+
+        # Resolve TP config that was active for this position
+        tp_type = tp_threshold_value = tp_trail_amount = tp_config_source = None
+        tp_partial_close_pct = None
+        if context:
+            tp_type = "dollars" if context.profit_threshold_dollars else "pips"
+            tp_threshold_value = context.profit_threshold
+            tp_trail_amount = context.trail
+            tp_partial_close_pct = int(context.partial_close_pct)
+            # Determine config source: override or defaults
+            sym_upper = symbol.upper()
+            scalp_key = "scalp_overrides" if is_scalp else "overrides"
+            defaults_key = "scalp_defaults" if is_scalp else "defaults"
+            tp_cfg = self.config.get("tp", {})
+            if sym_upper in tp_cfg.get(scalp_key, {}):
+                tp_config_source = f"{scalp_key}.{sym_upper}"
+            else:
+                tp_config_source = f"{defaults_key}.{asset_class}"
+        elif self.strategy:
+            try:
+                tv, td = self.strategy.get_profit_threshold(symbol, is_scalp)
+                trv, _ = self.strategy.get_trail(symbol, is_scalp)
+                tp_type = "dollars" if td else "pips"
+                tp_threshold_value = tv
+                tp_trail_amount = trv
+                tp_partial_close_pct = int(self.strategy.get_partial_close_pct())
+                tp_config_source = "defaults"
+            except Exception:
+                pass
+
+        # PnL calculation (approximate from prices)
+        pnl_dollars = pnl_pips = None
+        if fill_price and close_price:
+            price_move = (close_price - fill_price) if direction == "long" else (fill_price - close_price)
+            pnl_pips = mt5_api.price_to_pips(price_move, symbol)
+            # Approximate pnl in dollars: pips * pip_value_per_lot * lots
+            # We don't have exact pip value here, so store pips for now; pnl_dollars left None
+            # unless position already has profit info
+        if "profit" in position:
+            pnl_dollars = position["profit"]
+
+        # filled_at: parse from local_db if available
+        filled_at = None
+        try:
+            mapping = local_db.get_mapping_by_ticket(ticket)
+            if mapping and mapping.get("filled_at"):
+                filled_at = datetime.fromisoformat(mapping["filled_at"])
+        except Exception:
+            pass
+
+        row = dict(
+            mt5_account          = self.mt5_account,
+            discord_id           = self.discord_id,
+            license_key          = self.license_key,
+            signal_id            = signal_id,
+            mt5_ticket           = ticket,
+            symbol               = symbol,
+            db_instrument        = db_instrument,
+            asset_class          = asset_class,
+            direction            = direction,
+            is_scalp             = is_scalp,
+            outcome              = outcome_type,
+            fill_price           = fill_price,
+            close_price          = close_price,
+            lot_size             = lot_size,
+            pnl_dollars          = pnl_dollars,
+            pnl_pips             = pnl_pips,
+            tp_type              = tp_type,
+            tp_threshold_value   = tp_threshold_value,
+            tp_trail_amount      = tp_trail_amount,
+            tp_partial_close_pct = tp_partial_close_pct,
+            tp_config_source     = tp_config_source,
+            filled_at            = filled_at,
+            bot_version          = self.bot_version,
+        )
+
+        success = await supabase_db.insert_tp_outcome(self.pool, row)
+        if success:
+            logger.debug(f"tp_outcomes: recorded {outcome_type} for ticket={ticket} ({symbol})")
+        else:
+            logger.warning(f"tp_outcomes: failed to record {outcome_type} for ticket={ticket}")
 
     # ------------------------------------------------------------------
     # Cleanup
