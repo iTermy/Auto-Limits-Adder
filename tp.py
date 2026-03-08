@@ -76,6 +76,7 @@ class TPContext:
     profit_threshold_dollars:  bool  = False
     trail_dollars:             bool  = False
     partial_close_pct:         float = 50.0
+    is_scalp:                  bool  = False
 
 
 @dataclass
@@ -91,38 +92,101 @@ class TPAction:
 # Base strategy
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Asset class detection (mirrors sync.py logic)
+# ---------------------------------------------------------------------------
+
+def _detect_tp_asset_class(symbol: str) -> str:
+    """Return one of: forex, forex_jpy, metals, indices, stocks, crypto, oil."""
+    s = symbol.upper()
+    # Metals
+    if s in ("XAUUSD", "GOLD", "XAGUSD", "SILVER"):
+        return "metals"
+    # Oil
+    if "OIL" in s or "WTI" in s or "BRENT" in s or s in ("USOILSPOT",):
+        return "oil"
+    # Stocks (check before index keywords to avoid .NAS misclassification)
+    if s.endswith(".NAS") or s.endswith(".NYSE") or ".NAS-" in s or ".NYSE-" in s:
+        return "stocks"
+    # Indices
+    if any(k in s for k in ("SPX", "NAS", "DAX", "JP225", "UK100", "DE30",
+                              "US500", "USTEC", "HK50", "AUS200")):
+        return "indices"
+    # Crypto
+    if s.endswith("USD") or s.endswith("USDT") or s.endswith("BTC"):
+        if len(s) > 6:
+            return "crypto"
+    # Forex: 6-char pairs
+    if len(s) == 6 and s.isalpha():
+        if "JPY" in s:
+            return "forex_jpy"
+        return "forex"
+    return "forex"  # safe fallback
+
+
 class BaseTPStrategy(ABC):
     def __init__(self, config: dict):
         self.config = config
         self._tp_cfg = config.get("tp", {})
 
-    def _resolve_threshold(self, key: str, symbol: str, fallback: float) -> tuple[float, bool]:
+    def _resolve_params(self, symbol: str, is_scalp: bool = False) -> tuple[float, bool, float, bool]:
         """
-        Resolve a threshold value and its unit for a symbol.
+        Resolve (profit_threshold, threshold_dollars, trail, trail_dollars)
+        for a symbol, taking scalp flag into account.
 
-        Reads config like:
-            "profit_threshold": {
-                "unit": "pips",          <- default unit
-                "default": 7,
-                "per_instrument": { "XAUUSD": 2.0 },
-                "per_instrument_unit": { "XAUUSD": "dollars" }
+        Priority: per-instrument override > asset-class default.
+        New config format:
+            {
+              "defaults":        { "forex": {"type":"pips","value":5.0,"trail":3.0}, ... },
+              "scalp_defaults":  { "forex": {"type":"pips","value":3.0,"trail":2.0}, ... },
+              "overrides":       { "XAUUSD": {"type":"dollars","value":2.0,"trail":1.5} },
+              "scalp_overrides": { "XAUUSD": {"type":"dollars","value":1.0,"trail":0.8} },
+              "partial_close_percent": 50
             }
-
-        Returns (value, use_dollars).
         """
-        block = self._tp_cfg.get(key, {})
-        value = block.get("per_instrument", {}).get(symbol,
-                block.get("default", fallback))
-        # Determine unit: per-instrument override first, then block default
-        unit = block.get("per_instrument_unit", {}).get(symbol,
-               block.get("unit", "pips"))
-        return float(value), (unit == "dollars")
+        sym = symbol.upper()
+        overrides_key = "scalp_overrides" if is_scalp else "overrides"
+        defaults_key  = "scalp_defaults"  if is_scalp else "defaults"
 
-    def get_profit_threshold(self, symbol: str) -> tuple[float, bool]:
-        return self._resolve_threshold("profit_threshold", symbol, 7.0)
+        # Try per-instrument override first
+        override = self._tp_cfg.get(overrides_key, {}).get(sym)
+        if override:
+            t = override.get("type", "pips")
+            v = float(override.get("value", 5.0))
+            tr = float(override.get("trail", v))
+            dollars = (t == "dollars")
+            return v, dollars, tr, dollars
 
-    def get_trail(self, symbol: str) -> tuple[float, bool]:
-        return self._resolve_threshold("trail", symbol, 3.0)
+        # Fall back to asset class default
+        asset_class = _detect_tp_asset_class(sym)
+        cls_defaults = self._tp_cfg.get(defaults_key, {})
+
+        # Fallback chain: exact class → parent class → hardcoded
+        hardcoded = {"forex": (5.0,"pips"), "forex_jpy": (10.0,"pips"),
+                     "metals": (5.0,"dollars"), "indices": (20.0,"dollars"),
+                     "stocks": (1.0,"dollars"), "crypto": (50.0,"dollars"),
+                     "oil": (0.5,"dollars")}
+        if asset_class in cls_defaults:
+            entry = cls_defaults[asset_class]
+        elif asset_class == "forex_jpy" and "forex" in cls_defaults:
+            entry = cls_defaults["forex"]
+        else:
+            hv, ht = hardcoded.get(asset_class, (5.0, "pips"))
+            entry = {"type": ht, "value": hv, "trail": hv}
+
+        t  = entry.get("type", "pips")
+        v  = float(entry.get("value", 5.0))
+        tr = float(entry.get("trail", v))
+        dollars = (t == "dollars")
+        return v, dollars, tr, dollars
+
+    def get_profit_threshold(self, symbol: str, is_scalp: bool = False) -> tuple[float, bool]:
+        v, d, _, _ = self._resolve_params(symbol, is_scalp)
+        return v, d
+
+    def get_trail(self, symbol: str, is_scalp: bool = False) -> tuple[float, bool]:
+        _, _, tr, td = self._resolve_params(symbol, is_scalp)
+        return tr, td
 
     def get_partial_close_pct(self) -> float:
         return self._tp_cfg.get("partial_close_percent", 50)
@@ -313,6 +377,7 @@ class TPEngine:
         pos = live[0]
         pos["signal_id"] = mapping["signal_id"]
         pos["limit_id"]  = mapping["limit_id"]
+        pos["is_scalp"]  = mapping.get("is_scalp", False)
         self._positions[ticket] = pos
         logger.info(
             f"TPEngine: registered position ticket={ticket}, "
@@ -365,9 +430,10 @@ class TPEngine:
 
                 mapping = local_db.get_mapping_by_ticket(ticket)
                 limit_id = position.get("limit_id", 0)
+                is_scalp = position.get("is_scalp", False)
 
-                pt_value, pt_dollars = self.strategy.get_profit_threshold(symbol)
-                trail_value, trail_dollars = self.strategy.get_trail(symbol)
+                pt_value, pt_dollars = self.strategy.get_profit_threshold(symbol, is_scalp)
+                trail_value, trail_dollars = self.strategy.get_trail(symbol, is_scalp)
 
                 context = TPContext(
                     symbol                     = symbol,
@@ -384,6 +450,7 @@ class TPEngine:
                     trail                      = trail_value,
                     trail_dollars              = trail_dollars,
                     partial_close_pct          = self.strategy.get_partial_close_pct(),
+                    is_scalp                   = is_scalp,
                 )
 
                 action = self.strategy.on_tick(position, context)

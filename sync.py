@@ -1027,6 +1027,7 @@ class SyncEngine:
             order_type=mt5_api.order_type_to_str(order_type),
             lot_size=lot_size,
             db_stop_loss=signal["stop_loss"],
+            is_scalp=bool(signal.get("scalp", False)),
         )
 
         if use_offset and feed_mid is not None and mt5_mid is not None:

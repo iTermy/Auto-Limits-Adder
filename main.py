@@ -84,22 +84,6 @@ signal.signal(signal.SIGTERM, _handle_signal)
 async def main() -> None:
     global _shutdown
 
-    # Load environment
-    load_dotenv()
-    db_url       = os.environ.get("SUPABASE_DB_URL")
-    mt5_login    = os.environ.get("MT5_LOGIN")      # optional
-    mt5_password = os.environ.get("MT5_PASSWORD")   # optional
-    mt5_server   = os.environ.get("MT5_SERVER")     # optional
-
-    if not db_url:
-        logger.critical("Missing required environment variable: SUPABASE_DB_URL")
-        sys.exit(1)
-
-    if mt5_login or mt5_password or mt5_server:
-        logger.info("MT5 credentials found in .env — will authenticate explicitly.")
-    else:
-        logger.info("No MT5 credentials in .env — will attach to running terminal.")
-
     # Load config
     config = load_config()
     poll_interval = config.get("poll_interval_seconds", 5)
@@ -107,20 +91,16 @@ async def main() -> None:
     # Initialise local SQLite DB
     local_db.init_db()
 
-    # Connect to MT5
+    # Connect to MT5 — always attaches to the already-running terminal
     logger.info("Connecting to MT5...")
-    connected = mt5_api.connect(
-        login=mt5_login,
-        password=mt5_password,
-        server=mt5_server,
-    )
+    connected = mt5_api.connect()
     if not connected:
         logger.critical("Failed to connect to MT5. Exiting.")
         sys.exit(1)
 
     # Connect to Supabase
     logger.info("Connecting to Supabase...")
-    pool = await supabase_db.create_pool(db_url)
+    pool = await supabase_db.create_pool()
 
     # -----------------------------------------------------------------------
     # License validation

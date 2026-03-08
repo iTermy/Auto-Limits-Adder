@@ -8,10 +8,13 @@
       ]
     },
     "asset_classes": {
-      "mode": "all",
+      "mode": "include",
       "list": [
         "metals",
-        "forex"
+        "forex",
+        "indices",
+        "crypto",
+        "stocks"
       ]
     },
     "directions": "both",
@@ -19,8 +22,8 @@
     "signal_types": "all"
   },
   "proximity_filter": {
-    "enabled": false,
-    "default_pips": 500.0,
+    "enabled": true,
+    "default_pips": 500,
     "per_asset_class": {
       "metals": 500,
       "forex": 200,
@@ -37,40 +40,104 @@
     "min_lot": 0.01,
     "skip_if_price_past_limit": true,
     "place_all_limits_simultaneously": true,
-    "lot_recheck_interval_seconds": 300
+    "lot_recheck_interval_seconds": 120
   },
   "tp": {
-    "profit_threshold": {
-      "unit": "pips",
-      "default": 7.0,
-      "per_instrument": {
-        "XAUUSD": 2.0
+    "defaults": {
+      "forex": {
+        "type": "dollars",
+        "value": 5.0,
+        "trail": 3.0,
+        "description": "Standard forex pairs"
       },
-      "per_instrument_unit": {
-        "XAUUSD": "dollars"
+      "forex_jpy": {
+        "type": "pips",
+        "value": 10.0,
+        "trail": 5.0,
+        "description": "JPY pairs (auto-detected)"
+      },
+      "metals": {
+        "type": "dollars",
+        "value": 5.0,
+        "trail": 2.0,
+        "description": "Gold, Silver, etc."
+      },
+      "indices": {
+        "type": "dollars",
+        "value": 20.0,
+        "trail": 10.0,
+        "description": "Stock indices"
+      },
+      "stocks": {
+        "type": "dollars",
+        "value": 1.0,
+        "trail": 0.5,
+        "description": "Individual stocks"
+      },
+      "crypto": {
+        "type": "dollars",
+        "value": 50.0,
+        "trail": 20.0,
+        "description": "Cryptocurrencies"
+      },
+      "oil": {
+        "type": "dollars",
+        "value": 0.5,
+        "trail": 0.2,
+        "description": "Oil commodities"
       }
     },
-    "trail": {
-      "unit": "pips",
-      "default": 3.0,
-      "per_instrument": {
-        "XAUUSD": 2.0
+    "scalp_defaults": {
+      "forex": {
+        "type": "pips",
+        "value": 3.0,
+        "trail": 2.0,
+        "description": "Scalp - Standard forex pairs"
       },
-      "per_instrument_unit": {
-        "XAUUSD": "dollars"
+      "forex_jpy": {
+        "type": "pips",
+        "value": 5.0,
+        "trail": 3.0,
+        "description": "Scalp - JPY pairs (auto-detected)"
+      },
+      "metals": {
+        "type": "dollars",
+        "value": 2.0,
+        "trail": 1.0,
+        "description": "Scalp - Gold, Silver, etc."
+      },
+      "indices": {
+        "type": "dollars",
+        "value": 10.0,
+        "trail": 5.0,
+        "description": "Scalp - Stock indices"
+      },
+      "stocks": {
+        "type": "dollars",
+        "value": 0.5,
+        "trail": 0.25,
+        "description": "Scalp - Individual stocks"
+      },
+      "crypto": {
+        "type": "dollars",
+        "value": 20.0,
+        "trail": 10.0,
+        "description": "Scalp - Cryptocurrencies"
+      },
+      "oil": {
+        "type": "dollars",
+        "value": 0.2,
+        "trail": 0.1,
+        "description": "Scalp - Oil commodities"
       }
     },
+    "overrides": {},
+    "scalp_overrides": {},
     "partial_close_percent": 50
   },
   "symbol_map": {
     "XAUUSD": "XAUUSD",
-    "GOLD": "XAUUSD",
     "XAGUSD": "XAGUSD",
-    "SILVER": "XAGUSD",
-    "EURUSD": "EURUSD",
-    "GBPUSD": "GBPUSD",
-    "USDJPY": "USDJPY",
-    "GBPJPY": "GBPJPY",
     "SPX500USD": "US500",
     "NAS100USD": "USTEC",
     "BTCUSDT": "BTCUSD",

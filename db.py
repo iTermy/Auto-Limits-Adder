@@ -14,14 +14,22 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Read-only connection (hardcoded — bot is distributed as a compiled binary)
+# ---------------------------------------------------------------------------
+# This role has SELECT-only access on: signals, limits, live_prices, licenses.
+# It cannot INSERT, UPDATE, DELETE, or access any other table.
+# Rotate this password via Supabase dashboard → Database → Roles if compromised.
+_RO_DSN = "postgresql://execution_bot_ro:oS$95chu86HanS@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
+
 
 # ---------------------------------------------------------------------------
 # Pool lifecycle
 # ---------------------------------------------------------------------------
 
-async def create_pool(dsn: str) -> asyncpg.Pool:
-    """Create and return an asyncpg connection pool."""
-    pool = await asyncpg.create_pool(dsn=dsn, min_size=1, max_size=5)
+async def create_pool() -> asyncpg.Pool:
+    """Create and return an asyncpg connection pool using the hardcoded read-only DSN."""
+    pool = await asyncpg.create_pool(dsn=_RO_DSN, min_size=1, max_size=5)
     logger.info("Supabase connection pool created.")
     return pool
 

@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS order_mappings (
     last_offset_check        TEXT,   -- ISO timestamp of last offset readjustment check
     -- SL tracking (for detecting SL edits on already-filled positions)
     db_stop_loss             REAL,   -- signal stop_loss (DB space) at placement time
-    last_known_mt5_sl        REAL    -- the MT5-space SL we last applied (for change detection)
+    last_known_mt5_sl        REAL,   -- the MT5-space SL we last applied (for change detection)
+    is_scalp                 INTEGER NOT NULL DEFAULT 0  -- 1 if signal was a scalp
 );
 
 CREATE INDEX IF NOT EXISTS idx_om_signal_id ON order_mappings(signal_id);
@@ -124,6 +125,7 @@ def insert_order_mapping(
     order_type: str,
     lot_size: float,
     db_stop_loss: float = None,
+    is_scalp: bool = False,
     db_path: str = DB_PATH,
 ) -> int:
     """
@@ -132,11 +134,11 @@ def insert_order_mapping(
     """
     sql = """
         INSERT OR IGNORE INTO order_mappings
-            (limit_id, signal_id, mt5_ticket, order_type, lot_size, placed_at, status, db_stop_loss)
-        VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
+            (limit_id, signal_id, mt5_ticket, order_type, lot_size, placed_at, status, db_stop_loss, is_scalp)
+        VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
     """
     with get_connection(db_path) as conn:
-        cur = conn.execute(sql, (limit_id, signal_id, mt5_ticket, order_type, lot_size, _now_iso(), db_stop_loss))
+        cur = conn.execute(sql, (limit_id, signal_id, mt5_ticket, order_type, lot_size, _now_iso(), db_stop_loss, int(is_scalp)))
         conn.commit()
         if cur.rowcount == 0:
             # Duplicate — row already existed. Log and return existing id.

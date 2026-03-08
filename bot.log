@@ -38,3 +38,9 @@
 2026-03-06 23:18:44  CRITICAL  __main__ — No license key configured. Add your key to config.json under "license": { "key": "..." }. Run !activate in the Discord server to obtain a key.
 2026-03-06 23:18:45  INFO      db — Supabase connection pool closed.
 2026-03-06 23:18:45  INFO      mt5 — MT5 disconnected.
+2026-03-07 20:54:57  INFO      __main__ — No MT5 credentials in .env — will attach to running terminal.
+2026-03-07 20:54:57  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-07 20:54:57  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-07 20:54:57  INFO      __main__ — Connecting to MT5...
+2026-03-07 20:55:02  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-07 20:55:02  INFO      __main__ — Connecting to Supabase...

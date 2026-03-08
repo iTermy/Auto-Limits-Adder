@@ -123,8 +123,14 @@ def make_combobox(parent, values, width=18, **kwargs) -> ttk.Combobox:
     style.theme_use("clam")
     style.configure("Dark.TCombobox",
         fieldbackground=BG3, background=BG3, foreground=FG,
-        selectbackground=ACCENT, selectforeground=FG,
+        selectbackground=BG3, selectforeground=FG,
         bordercolor=BORDER, arrowcolor=FG_DIM, relief="flat"
+    )
+    style.map("Dark.TCombobox",
+        fieldbackground=[("readonly", BG3), ("disabled", BG2)],
+        foreground=[("readonly", FG), ("disabled", FG_DIM)],
+        selectbackground=[("readonly", BG3)],
+        selectforeground=[("readonly", FG)],
     )
     return ttk.Combobox(parent, values=values, width=width, style="Dark.TCombobox",
                         state="readonly", font=FONT_BODY, **kwargs)
@@ -140,14 +146,48 @@ def make_spinbox(parent, from_, to, increment=1.0, width=10, **kwargs) -> tk.Spi
 def make_checkbutton(parent, variable) -> tk.Checkbutton:
     return tk.Checkbutton(
         parent, variable=variable,
-        bg=BG, activebackground=BG, selectcolor=BG3,
+        bg=BG, activebackground=BG, selectcolor=BG,
         relief="flat", bd=0, cursor="hand2"
-    )
+    , fg=FG)
 
 def section_header(parent, text: str) -> None:
     f = make_frame(parent)
     f.pack(fill="x", padx=16, pady=(14, 4))
     make_label(f, text, bold=True).pack(side="left")
+
+
+def collapsible_section(parent, title: str) -> tuple:
+    """
+    Returns (toggle_fn, body_frame).
+    Call toggle_fn() to expand/collapse. Body frame starts hidden.
+    """
+    header = make_frame(parent)
+    header.pack(fill="x", padx=16, pady=(14, 0))
+
+    arrow_var = tk.StringVar(value="▶")
+    arrow_lbl = tk.Label(header, textvariable=arrow_var, bg=BG, fg=FG_DIM,
+                         font=FONT_BODY, cursor="hand2")
+    arrow_lbl.pack(side="left")
+    title_lbl = tk.Label(header, text=f"  {title}", bg=BG, fg=FG,
+                         font=("Segoe UI", 9, "bold"), cursor="hand2")
+    title_lbl.pack(side="left")
+
+    body = tk.Frame(parent, bg=BG)
+    # body starts hidden
+
+    def _toggle(event=None):
+        if body.winfo_ismapped():
+            body.pack_forget()
+            arrow_var.set("▶")
+        else:
+            body.pack(fill="x")
+            arrow_var.set("▼")
+
+    header.bind("<Button-1>", _toggle)
+    arrow_lbl.bind("<Button-1>", _toggle)
+    title_lbl.bind("<Button-1>", _toggle)
+
+    return _toggle, body
     tk.Frame(f, bg=BORDER, height=1).pack(
         side="left", fill="x", expand=True, padx=(8, 0), pady=4)
 
@@ -317,95 +357,201 @@ class InstrumentExcludeEditor(tk.Frame):
 # Per-Instrument TP Override Editor
 # ─────────────────────────────────────────────
 
-class PerInstrumentTPEditor(tk.Frame):
+
+TP_ASSET_CLASSES = ["forex", "forex_jpy", "metals", "indices", "stocks", "crypto", "oil"]
+TP_DEFAULTS = {
+    "forex":     {"type": "pips",    "value": 5.0,  "trail": 3.0,  "description": "Standard forex pairs"},
+    "forex_jpy": {"type": "pips",    "value": 10.0, "trail": 5.0,  "description": "JPY pairs (auto-detected)"},
+    "metals":    {"type": "dollars", "value": 5.0,  "trail": 2.0,  "description": "Gold, Silver, etc."},
+    "indices":   {"type": "dollars", "value": 20.0, "trail": 10.0, "description": "Stock indices"},
+    "stocks":    {"type": "dollars", "value": 1.0,  "trail": 0.5,  "description": "Individual stocks"},
+    "crypto":    {"type": "dollars", "value": 50.0, "trail": 20.0, "description": "Cryptocurrencies"},
+    "oil":       {"type": "dollars", "value": 0.5,  "trail": 0.2,  "description": "Oil commodities"},
+}
+TP_SCALP_DEFAULTS = {
+    "forex":     {"type": "pips",    "value": 3.0,  "trail": 2.0,  "description": "Scalp - Standard forex pairs"},
+    "forex_jpy": {"type": "pips",    "value": 5.0,  "trail": 3.0,  "description": "Scalp - JPY pairs (auto-detected)"},
+    "metals":    {"type": "dollars", "value": 2.0,  "trail": 1.0,  "description": "Scalp - Gold, Silver, etc."},
+    "indices":   {"type": "dollars", "value": 10.0, "trail": 5.0,  "description": "Scalp - Stock indices"},
+    "stocks":    {"type": "dollars", "value": 0.5,  "trail": 0.25, "description": "Scalp - Individual stocks"},
+    "crypto":    {"type": "dollars", "value": 20.0, "trail": 10.0, "description": "Scalp - Cryptocurrencies"},
+    "oil":       {"type": "dollars", "value": 0.2,  "trail": 0.1,  "description": "Scalp - Oil commodities"},
+}
+
+class TPClassEditor(tk.Frame):
     """
-    Each row = one instrument with: unit, TP threshold, trail amount.
-    Columns: Instrument | Unit | TP Threshold | Trail Amount | [delete]
+    Displays a grid of rows for each TP asset class.
+    Each row: Label | Unit | TP Threshold | Trail Amount
+    Two modes: normal defaults and scalp defaults (shown in two stacked sections).
+    Plus an overrides table for per-instrument overrides.
     """
-    def __init__(self, parent,
-                 tp_data: dict, tp_unit_data: dict,
-                 trail_data: dict, trail_unit_data: dict,
-                 partial_pct_var: tk.StringVar,
-                 **kwargs):
+    def __init__(self, parent, tp_cfg: dict, **kwargs):
         super().__init__(parent, bg=BG, **kwargs)
-        self._rows = []
-        self._build_header()
+        self._rows_normal = {}
+        self._rows_scalp  = {}
+        self._override_rows = []
 
-        instrs = list(dict.fromkeys(list(tp_data.keys()) + list(trail_data.keys())))
-        for instr in instrs:
-            unit      = tp_unit_data.get(instr, trail_unit_data.get(instr, "pips"))
-            tp_val    = tp_data.get(instr, "")
-            trail_val = trail_data.get(instr, "")
-            self._add_row(instr, unit, tp_val, trail_val)
+        defaults       = tp_cfg.get("defaults", {})
+        scalp_defaults = tp_cfg.get("scalp_defaults", {})
+        overrides      = tp_cfg.get("overrides", {})
+        scalp_overrides= tp_cfg.get("scalp_overrides", {})
 
-        make_button(self, "+ Add Instrument Override", self._add_empty).pack(
+        self._partial_pct_var = tk.StringVar(value=str(tp_cfg.get("partial_close_percent", 50)))
+
+        # Partial close
+        f_pct = tk.Frame(self, bg=BG)
+        f_pct.pack(fill="x", pady=(0, 6))
+        tk.Label(f_pct, text="Partial close %  (remainder is trailed)", bg=BG, fg=FG,
+                 font=FONT_BODY, width=38, anchor="w").pack(side="left", padx=(0, 8))
+        e_pct = make_spinbox(f_pct, 10, 100, 5, width=8)
+        e_pct.delete(0, tk.END)
+        e_pct.insert(0, str(tp_cfg.get("partial_close_percent", 50)))
+        e_pct.pack(side="left")
+        self._partial_pct_entry = e_pct
+        tk.Label(f_pct, text="e.g. 50% closes half at TP, trails the rest", bg=BG,
+                 fg=FG_DIM, font=FONT_SMALL).pack(side="left", padx=(8, 0))
+
+        # Normal defaults
+        self._build_section("Standard Signals", defaults, TP_DEFAULTS, self._rows_normal)
+
+        # Scalp defaults
+        self._build_section("Scalp Signals", scalp_defaults, TP_SCALP_DEFAULTS, self._rows_scalp)
+
+        # Instrument overrides
+        tk.Label(self, text="Per-Instrument Overrides", bg=BG, fg=FG,
+                 font=FONT_BODY).pack(anchor="w", pady=(10, 2))
+        tk.Label(self, text="Exact instrument name (e.g. XAUUSD) overrides the class default.",
+                 bg=BG, fg=FG_DIM, font=FONT_SMALL).pack(anchor="w", pady=(0, 4))
+
+        self._override_container = tk.Frame(self, bg=BG)
+        self._override_container.pack(fill="x")
+        self._build_override_header(self._override_container)
+
+        # Load existing overrides
+        all_instrs = list(dict.fromkeys(list(overrides.keys()) + list(scalp_overrides.keys())))
+        for instr in all_instrs:
+            ov  = overrides.get(instr, {})
+            sov = scalp_overrides.get(instr, {})
+            self._add_override_row(
+                instr,
+                ov.get("type", "pips"), ov.get("value", ""), ov.get("trail", ""),
+                sov.get("type", "pips"), sov.get("value", ""), sov.get("trail", ""),
+            )
+
+        make_button(self, "+ Add Instrument Override", self._add_empty_override).pack(
             anchor="w", pady=(6, 2))
 
-    def _build_header(self):
-        hdr = tk.Frame(self, bg=BG2)
+    def _col_header(self, parent, labels):
+        hdr = tk.Frame(parent, bg=BG2)
         hdr.pack(fill="x")
-        for col, w in [("Instrument", 10), ("Unit", 8), ("TP Threshold", 12), ("Trail Amount", 12)]:
-            tk.Label(hdr, text=col, bg=BG2, fg=FG_DIM, font=FONT_SMALL,
+        for text, w in labels:
+            tk.Label(hdr, text=text, bg=BG2, fg=FG_DIM, font=FONT_SMALL,
                      width=w, anchor="w").pack(side="left", padx=(6, 0), pady=3)
 
-    def _add_row(self, instr="", unit="pips", tp_val="", trail_val=""):
+    def _build_section(self, title, saved_data, template, row_store):
+        tk.Label(self, text=title, bg=BG, fg=FG, font=FONT_BODY).pack(
+            anchor="w", pady=(8, 2))
+        self._col_header(self, [("Asset Class", 14), ("Unit", 8), ("TP Threshold", 13), ("Trail Amount", 13)])
+        for cls in TP_ASSET_CLASSES:
+            defaults = template.get(cls, {})
+            saved    = saved_data.get(cls, {})
+            unit  = saved.get("type",  defaults.get("type",  "pips"))
+            tp_v  = saved.get("value", defaults.get("value", ""))
+            tr_v  = saved.get("trail", defaults.get("trail", defaults.get("value", "")))
+            row_store[cls] = self._add_class_row(cls, unit, tp_v, tr_v)
+
+    def _add_class_row(self, cls, unit, tp_val, trail_val):
         f = tk.Frame(self, bg=BG3, pady=2)
         f.pack(fill="x", pady=1)
-
-        e_instr = make_entry(f, width=10)
-        e_instr.insert(0, instr)
-        e_instr.pack(side="left", padx=(6, 4))
-
+        tk.Label(f, text=cls, bg=BG3, fg=FG, font=FONT_BODY,
+                 width=14, anchor="w").pack(side="left", padx=(6, 4))
         cb_unit = make_combobox(f, ["pips", "dollars"], width=8)
         cb_unit.set(unit)
         cb_unit.pack(side="left", padx=(0, 4))
-
-        e_tp = make_entry(f, width=9)
+        e_tp = make_entry(f, width=10)
         e_tp.insert(0, str(tp_val))
         e_tp.pack(side="left", padx=(0, 4))
-
-        e_trail = make_entry(f, width=9)
+        e_trail = make_entry(f, width=10)
         e_trail.insert(0, str(trail_val))
         e_trail.pack(side="left", padx=(0, 4))
+        return {"unit": cb_unit, "tp": e_tp, "trail": e_trail}
 
-        row_ref = {"frame": f, "instr": e_instr, "unit": cb_unit,
-                   "tp": e_tp, "trail": e_trail}
-        btn = make_button(f, "✕", lambda r=row_ref: self._del_row(r), danger=True)
-        btn.config(padx=6, pady=2)
-        btn.pack(side="left")
-        self._rows.append(row_ref)
+    def _build_override_header(self, parent):
+        self._col_header(parent, [
+            ("Instrument", 10), ("Unit", 7), ("TP", 7), ("Trail", 7),
+            ("Scalp Unit", 9), ("Scalp TP", 8), ("Scalp Trail", 10)
+        ])
 
-    def _del_row(self, row_ref):
+    def _add_override_row(self, instr="", unit="pips", tp="", trail="",
+                          s_unit="pips", s_tp="", s_trail=""):
+        f = tk.Frame(self._override_container, bg=BG3, pady=2)
+        f.pack(fill="x", pady=1)
+        e_instr = make_entry(f, width=10); e_instr.insert(0, instr); e_instr.pack(side="left", padx=(6,3))
+        cb  = make_combobox(f, ["pips","dollars"], width=7); cb.set(unit); cb.pack(side="left", padx=(0,3))
+        e_tp  = make_entry(f, width=6); e_tp.insert(0, str(tp)); e_tp.pack(side="left", padx=(0,3))
+        e_tr  = make_entry(f, width=6); e_tr.insert(0, str(trail)); e_tr.pack(side="left", padx=(0,3))
+        cb_s  = make_combobox(f, ["pips","dollars"], width=7); cb_s.set(s_unit); cb_s.pack(side="left", padx=(0,3))
+        e_stp = make_entry(f, width=6); e_stp.insert(0, str(s_tp)); e_stp.pack(side="left", padx=(0,3))
+        e_str = make_entry(f, width=7); e_str.insert(0, str(s_trail)); e_str.pack(side="left", padx=(0,3))
+        row_ref = {"frame": f, "instr": e_instr, "unit": cb, "tp": e_tp, "trail": e_tr,
+                   "s_unit": cb_s, "s_tp": e_stp, "s_trail": e_str}
+        btn = make_button(f, "✕", lambda r=row_ref: self._del_override(r), danger=True)
+        btn.config(padx=5, pady=2); btn.pack(side="left")
+        self._override_rows.append(row_ref)
+
+    def _del_override(self, row_ref):
         row_ref["frame"].destroy()
-        if row_ref in self._rows:
-            self._rows.remove(row_ref)
+        if row_ref in self._override_rows:
+            self._override_rows.remove(row_ref)
 
-    def _add_empty(self):
-        self._add_row()
+    def _add_empty_override(self):
+        self._add_override_row()
 
-    def get_data(self):
-        """Returns (tp_vals, tp_units, trail_vals, trail_units)."""
-        tp_vals, tp_units, trail_vals, trail_units = {}, {}, {}, {}
-        for r in self._rows:
+    def _read_class_rows(self, row_store, template):
+        out = {}
+        for cls, widgets in row_store.items():
+            unit  = widgets["unit"].get()
+            tp_s  = widgets["tp"].get().strip()
+            tr_s  = widgets["trail"].get().strip()
+            default_v = template.get(cls, {}).get("value", "")
+            try:   tp_v = float(tp_s)
+            except: tp_v = float(default_v) if default_v != "" else 0.0
+            try:   tr_v = float(tr_s)
+            except: tr_v = tp_v
+            out[cls] = {"type": unit, "value": tp_v, "trail": tr_v,
+                        "description": template.get(cls, {}).get("description", cls)}
+        return out
+
+    def _read_overrides(self):
+        overrides, scalp_overrides = {}, {}
+        for r in self._override_rows:
             instr = r["instr"].get().strip().upper()
-            unit  = r["unit"].get()
-            tp_s  = r["tp"].get().strip()
-            tr_s  = r["trail"].get().strip()
             if not instr:
                 continue
-            if tp_s:
-                try:
-                    tp_vals[instr]  = float(tp_s)
-                    tp_units[instr] = unit
-                except ValueError:
-                    pass
-            if tr_s:
-                try:
-                    trail_vals[instr]  = float(tr_s)
-                    trail_units[instr] = unit
-                except ValueError:
-                    pass
-        return tp_vals, tp_units, trail_vals, trail_units
+            def _try(s, fallback=0.0):
+                try: return float(s.strip())
+                except: return fallback
+            overrides[instr] = {"type": r["unit"].get(),
+                                 "value": _try(r["tp"].get()),
+                                 "trail": _try(r["trail"].get())}
+            scalp_overrides[instr] = {"type": r["s_unit"].get(),
+                                       "value": _try(r["s_tp"].get()),
+                                       "trail": _try(r["s_trail"].get())}
+        return overrides, scalp_overrides
+
+    def get_data(self):
+        """Returns the full tp config dict ready to write to config.json."""
+        try: pct = int(self._partial_pct_entry.get())
+        except: pct = 50
+        overrides, scalp_overrides = self._read_overrides()
+        return {
+            "defaults":       self._read_class_rows(self._rows_normal, TP_DEFAULTS),
+            "scalp_defaults": self._read_class_rows(self._rows_scalp, TP_SCALP_DEFAULTS),
+            "overrides":      overrides,
+            "scalp_overrides":scalp_overrides,
+            "partial_close_percent": pct,
+        }
+
 
 # ─────────────────────────────────────────────
 # Log panel
@@ -545,8 +691,7 @@ class SettingsWindow(tk.Tk):
         self._tab_general    = self._make_scroll_tab("General")
         self._tab_filters    = self._make_scroll_tab("Filters")
         self._tab_execution  = self._make_scroll_tab("Execution")
-        self._tab_tp         = self._make_scroll_tab("Take Profit")
-        self._tab_connection = self._make_scroll_tab("Connection")
+        self._tab_mappings   = self._make_scroll_tab("Mappings")
 
         log_frame = tk.Frame(self._nb, bg=BG)
         self._nb.add(log_frame, text="  Log  ")
@@ -556,8 +701,7 @@ class SettingsWindow(tk.Tk):
         self._build_general(self._tab_general)
         self._build_filters(self._tab_filters)
         self._build_execution(self._tab_execution)
-        self._build_tp(self._tab_tp)
-        self._build_connection(self._tab_connection)
+        self._build_mappings(self._tab_mappings)
 
         botbar = tk.Frame(self, bg=BG2, height=50)
         botbar.pack(fill="x", side="bottom")
@@ -581,9 +725,10 @@ class SettingsWindow(tk.Tk):
         wid = canvas.create_window((0, 0), window=inner, anchor="nw")
         inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(wid, width=e.width))
-        canvas.bind_all("<MouseWheel>",
-            lambda e: canvas.yview_scroll(int(-1*(e.delta/120)), "units")
-            if canvas.winfo_ismapped() else None)
+        def _on_mousewheel(e):
+            canvas.yview_scroll(int(-1*(e.delta/120)), "units")
+        canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
         return inner
 
     # ──────── General tab ────────
@@ -593,22 +738,57 @@ class SettingsWindow(tk.Tk):
         f = make_frame(p)
         f.pack(fill="x", padx=24, pady=3)
         make_label(f, "License Key").pack(side="left")
-        self._license_entry = make_entry(f, width=36, show="*")
-        self._license_entry.pack(side="right")
-
+        self._license_status = tk.Label(f, text="", bg=BG, fg=FG_DIM, font=FONT_SMALL)
+        self._license_status.pack(side="right", padx=(0, 10))
         f2 = make_frame(p)
-        f2.pack(fill="x", padx=24, pady=(0, 4))
+        f2.pack(fill="x", padx=24, pady=3)
+        self._license_entry = make_entry(f2, width=38, show="*")
+        self._license_entry.pack(side="left")
         self._show_key_var = tk.BooleanVar(value=False)
         tk.Checkbutton(f2, text="Show key", variable=self._show_key_var,
-                       bg=BG, fg=FG_DIM, activebackground=BG, selectcolor=BG3,
-                       font=FONT_SMALL, cursor="hand2",
+                       bg=BG, fg=FG, activebackground=BG, activeforeground=FG,
+                       selectcolor=BG, font=FONT_SMALL, cursor="hand2",
                        command=lambda: self._license_entry.config(
                            show="" if self._show_key_var.get() else "*")
-                       ).pack(side="right")
-        make_label(f2, "Provided by the bot admin via Discord.", dim=True,
-                   font=FONT_SMALL).pack(side="left")
+                       ).pack(side="left", padx=(8, 0))
+        info_note(p, "Run !activate in the Discord server to get your key. "
+                     "The key is bound to your MT5 account number.")
 
-    # ──────── Filters tab ────────
+
+        _, adv_body = collapsible_section(p, "Advanced Settings")
+
+        section_header(adv_body, "Proximity Filter")
+        info_note(adv_body, "Only place orders within the specified pip distance of the current price. "
+                            "Useful to avoid placing orders that are far from current price.")
+        self._prox_default = labeled_row(adv_body, "Default (pips)",
+            lambda f: make_spinbox(f, 10, 10000, 50))
+        make_label(adv_body, "Per asset class overrides", dim=True,
+                   font=FONT_SMALL).pack(anchor="w", padx=24, pady=(8, 2))
+        self._prox_ac = {}
+        prox_defaults = [
+            ("metals",  "Metals (pips)",  500),
+            ("forex",   "Forex (pips)",   200),
+            ("indices", "Indices (pips)", 1000),
+            ("crypto",  "Crypto (pips)",  2000),
+            ("stocks",  "Stocks (pips)",  300),
+        ]
+        for cls, label, _ in prox_defaults:
+            sb = labeled_row(adv_body, f"  {label}",
+                lambda f: make_spinbox(f, 10, 50000, 50))
+            self._prox_ac[cls] = sb
+
+        section_header(adv_body, "Feed Offset  (Indices & Crypto only)")
+        info_note(adv_body,
+            "Indices and crypto are priced differently between the signal feed "
+            "(OANDA / Binance) and ICMarkets MT5. The bot auto-computes the offset "
+            "and places orders at the correct MT5-equivalent price. "
+            "The defaults are fine for most setups.")
+        self._max_stale = labeled_row(adv_body, "Max price data age before skipping (s)",
+            lambda f: make_spinbox(f, 5, 120, 5))
+        self._readjust_interval = labeled_row(adv_body, "Offset re-check interval (s)",
+            lambda f: make_spinbox(f, 10, 600, 10))
+        self._readjust_threshold = labeled_row(adv_body, "Re-place order if drift exceeds (pips)",
+            lambda f: make_spinbox(f, 0.5, 50, 0.5, width=10, format="%.1f"))
 
     def _build_filters(self, p):
         section_header(p, "Excluded Instruments")
@@ -635,7 +815,7 @@ class SettingsWindow(tk.Tk):
             self._ac_vars[cls] = var
             tk.Checkbutton(ac_frame, text=label, variable=var,
                            bg=BG, fg=FG, activebackground=BG,
-                           selectcolor=BG3, font=FONT_BODY, cursor="hand2"
+                           selectcolor=BG, font=FONT_BODY, cursor="hand2"
                            ).pack(anchor="w", pady=1)
 
         section_header(p, "Scalp Signals")
@@ -645,25 +825,6 @@ class SettingsWindow(tk.Tk):
         self._scalp_var = tk.BooleanVar(value=True)
         make_checkbutton(f, self._scalp_var).pack(side="right")
 
-        section_header(p, "Proximity Filter")
-        info_note(p, "Only place orders within the specified pip distance of the current price.")
-        self._prox_default = labeled_row(p, "Default (pips)",
-            lambda f: make_spinbox(f, 10, 10000, 50))
-
-        make_label(p, "Per asset class overrides", dim=True,
-                   font=FONT_SMALL).pack(anchor="w", padx=24, pady=(8, 2))
-        self._prox_ac = {}
-        prox_defaults = [
-            ("metals",  "Metals (pips)",  500),
-            ("forex",   "Forex (pips)",   200),
-            ("indices", "Indices (pips)", 1000),
-            ("crypto",  "Crypto (pips)",  2000),
-            ("stocks",  "Stocks (pips)",  300),
-        ]
-        for cls, label, _ in prox_defaults:
-            sb = labeled_row(p, f"  {label}",
-                lambda f: make_spinbox(f, 10, 50000, 50))
-            self._prox_ac[cls] = sb
 
     # ──────── Execution tab ────────
 
@@ -678,134 +839,23 @@ class SettingsWindow(tk.Tk):
         info_note(p, "Lot sizes are recalculated periodically from current account balance. "
                      "60–120 s is recommended.")
 
-        section_header(p, "Feed Offset  (Indices & Crypto only)")
+        section_header(p, "Take Profit")
         info_note(p,
-            "Indices (SPX500, NAS100) and crypto (BTC, ETH) are priced differently between "
-            "your signal feed (OANDA / Binance) and ICMarkets MT5. The bot automatically "
-            "computes the difference and places orders at the correct MT5-equivalent price. "
-            "These settings control how often to re-check for drift and re-place if needed. "
-            "The defaults are fine for most setups.")
-        self._max_stale = labeled_row(p, "Max price data age before skipping (s)",
-            lambda f: make_spinbox(f, 5, 120, 5))
-        self._readjust_interval = labeled_row(p, "Offset re-check interval (s)",
-            lambda f: make_spinbox(f, 10, 600, 10))
-        self._readjust_threshold = labeled_row(p, "Re-place order if drift exceeds (pips)",
-            lambda f: make_spinbox(f, 0.5, 50, 0.5, width=10, format="%.1f"))
+            "Configure TP threshold (profit level that triggers the partial close) and "
+            "trail amount (how tight the trailing stop is on the remaining position). "
+            "Scalp signals use separate values. Per-instrument overrides take precedence.")
+        self._tp_editor = TPClassEditor(p, {})
+        self._tp_editor.pack(fill="x", padx=24, pady=(4, 12))
 
-    # ──────── Take Profit tab ────────
+    # ──────── Mappings tab ────────
 
-    def _build_tp(self, p):
-        section_header(p, "Defaults")
-        info_note(p,
-            "Default values apply to all instruments not listed in the overrides below. "
-            "Forex and stocks use pips. Gold, Silver, Indices, and Crypto use dollars "
-            "— set per-instrument overrides accordingly.")
-
-        self._tp_default = labeled_row(p, "TP threshold (profit level that triggers close)",
-            lambda f: make_spinbox(f, 0.1, 10000, 0.5, width=10, format="%.1f"))
-        self._trail_default = labeled_row(p, "Trail amount (distance to trail remaining position)",
-            lambda f: make_spinbox(f, 0.1, 10000, 0.5, width=10, format="%.1f"))
-        self._partial_pct = labeled_row(p, "Partial close %  (remainder is trailed)",
-            lambda f: make_spinbox(f, 10, 100, 5, width=10))
-        info_note(p, "e.g. 50% means close half at TP, trail the other half.")
-
-        section_header(p, "Per-Instrument Overrides")
-        info_note(p,
-            "Set instrument-specific unit, TP threshold, and trail amount. "
-            "Leave a field blank to inherit the default above. "
-            "Both TP threshold and trail amount use the same unit per instrument.")
-        self._partial_pct_var = tk.StringVar(value="50")
-        self._tp_override_editor = PerInstrumentTPEditor(
-            p, {}, {}, {}, {}, self._partial_pct_var)
-        self._tp_override_editor.pack(fill="x", padx=24, pady=(4, 12))
-
-    # ──────── Connection tab ────────
-
-    def _build_connection(self, p):
-        section_header(p, "Supabase Database")
-        info_note(p, "The database URL is stored only in your local .env file and is never "
-                     "displayed in this window. Keep .env out of shared or synced folders.")
-        f_url = make_frame(p)
-        f_url.pack(fill="x", padx=24, pady=3)
-        make_label(f_url, "Database URL").pack(side="left")
-        self._db_url_status = tk.Label(f_url, text="", bg=BG, fg=FG_DIM, font=FONT_SMALL)
-        self._db_url_status.pack(side="right", padx=(0, 10))
-        make_button(f_url, "Set / Update URL", self._prompt_db_url).pack(side="right")
-
-        section_header(p, "MT5 Credentials")
-        info_note(p,
-            "Leave all three fields blank to attach to the already-running MT5 terminal "
-            "using the account you are currently logged in to. "
-            "Fill them in only if you need the bot to authenticate programmatically "
-            "(e.g. running headless or on a VPS).")
-        self._mt5_login    = labeled_row(p, "Login (account number)",
-            lambda f: make_entry(f, width=20))
-        self._mt5_password = labeled_row(p, "Password",
-            lambda f: make_entry(f, width=20, show="*"))
-        self._mt5_server   = labeled_row(p, "Server",
-            lambda f: make_entry(f, width=20))
-        f3 = make_frame(p)
-        f3.pack(fill="x", padx=24, pady=(2, 0))
-        self._show_mt5_var = tk.BooleanVar(value=False)
-        tk.Checkbutton(f3, text="Show password", variable=self._show_mt5_var,
-                       bg=BG, fg=FG_DIM, activebackground=BG, selectcolor=BG3,
-                       font=FONT_SMALL, cursor="hand2",
-                       command=lambda: self._mt5_password.config(
-                           show="" if self._show_mt5_var.get() else "*")
-                       ).pack(anchor="w")
-
+    def _build_mappings(self, p):
         section_header(p, "Symbol Map")
         info_note(p, "Maps DB instrument names to MT5 symbol names. "
                      "Stocks get -24 appended automatically. "
                      "Everything else defaults to the DB name uppercased.")
         self._sym_editor = SymbolMapEditor(p, {})
         self._sym_editor.pack(fill="x", padx=24, pady=(4, 16))
-
-    def _prompt_db_url(self):
-        dlg = tk.Toplevel(self)
-        dlg.title("Set Database URL")
-        dlg.configure(bg=BG)
-        dlg.resizable(False, False)
-        dlg.grab_set()
-
-        pad = make_frame(dlg)
-        pad.pack(padx=28, pady=24, fill="both", expand=True)
-        make_label(pad, "Supabase Database URL", bold=True).pack(anchor="w")
-        make_label(pad, "Saved to .env — not displayed elsewhere.", dim=True,
-                   font=FONT_SMALL).pack(anchor="w", pady=(2, 12))
-        entry = make_entry(pad, width=58)
-        entry.insert(0, self._env.get("SUPABASE_DB_URL", ""))
-        entry.pack(fill="x", pady=(0, 12))
-        entry.focus_set()
-
-        def _do_save():
-            val = entry.get().strip()
-            if val:
-                self._env["SUPABASE_DB_URL"] = val
-                save_env(self._env)
-                self._update_db_url_status()
-            dlg.destroy()
-
-        bf = make_frame(pad)
-        bf.pack(fill="x")
-        make_button(bf, "Cancel", dlg.destroy).pack(side="right", padx=(6, 0))
-        make_button(bf, "Save", _do_save, accent=True).pack(side="right")
-        entry.bind("<Return>", lambda e: _do_save())
-
-        def _center_dlg():
-            dlg.update_idletasks()
-            x = self.winfo_x() + self.winfo_width()//2 - dlg.winfo_reqwidth()//2
-            y = self.winfo_y() + self.winfo_height()//2 - dlg.winfo_reqheight()//2
-            dlg.geometry(f"+{x}+{y}")
-        dlg.after(50, _center_dlg)
-
-    def _update_db_url_status(self):
-        if self._env.get("SUPABASE_DB_URL", "").strip():
-            self._db_url_status.config(text="✓ URL is set", fg=GREEN)
-        else:
-            self._db_url_status.config(text="Not set", fg=RED)
-
-    # ──────── Load / Save ────────
 
     def _load_values(self):
         cfg = self._cfg
@@ -814,7 +864,6 @@ class SettingsWindow(tk.Tk):
         # General
         self._license_entry.delete(0, tk.END)
         self._license_entry.insert(0, cfg.get("license", {}).get("key", ""))
-
         # Filters
         filt     = cfg.get("filters", {})
         inst_cfg = filt.get("instruments", {})
@@ -859,7 +908,6 @@ class SettingsWindow(tk.Tk):
         self._min_lot.insert(0, str(ex.get("min_lot", 0.01)))
         self._lot_recheck.delete(0, tk.END)
         self._lot_recheck.insert(0, str(ex.get("lot_recheck_interval_seconds", 120)))
-
         lp = cfg.get("live_prices", {})
         self._max_stale.delete(0, tk.END)
         self._max_stale.insert(0, str(lp.get("max_staleness_seconds", 30)))
@@ -868,39 +916,15 @@ class SettingsWindow(tk.Tk):
         self._readjust_threshold.delete(0, tk.END)
         self._readjust_threshold.insert(0, str(lp.get("offset_readjust_threshold_pips", 2.0)))
 
-        # TP
-        tp  = cfg.get("tp", {})
-        pt  = tp.get("profit_threshold", {})
-        tr  = tp.get("trail", {})
-        self._tp_default.delete(0, tk.END)
-        self._tp_default.insert(0, str(pt.get("default", 7)))
-        self._trail_default.delete(0, tk.END)
-        self._trail_default.insert(0, str(tr.get("default", 3)))
-        self._partial_pct.delete(0, tk.END)
-        self._partial_pct.insert(0, str(tp.get("partial_close_percent", 50)))
+        # TP — rebuild editor from current config
+        tp_cfg = cfg.get("tp", {})
+        self._tp_editor.destroy()
+        self._tp_editor = TPClassEditor(self._tab_execution, tp_cfg)
+        self._tp_editor.pack(fill="x", padx=24, pady=(4, 12))
 
-        self._tp_override_editor.destroy()
-        self._tp_override_editor = PerInstrumentTPEditor(
-            self._tab_tp,
-            pt.get("per_instrument", {}),
-            pt.get("per_instrument_unit", {}),
-            tr.get("per_instrument", {}),
-            tr.get("per_instrument_unit", {}),
-            self._partial_pct_var,
-        )
-        self._tp_override_editor.pack(fill="x", padx=24, pady=(4, 12))
-
-        # Connection
-        self._update_db_url_status()
-        self._mt5_login.delete(0, tk.END)
-        self._mt5_login.insert(0, env.get("MT5_LOGIN", ""))
-        self._mt5_password.delete(0, tk.END)
-        self._mt5_password.insert(0, env.get("MT5_PASSWORD", ""))
-        self._mt5_server.delete(0, tk.END)
-        self._mt5_server.insert(0, env.get("MT5_SERVER", ""))
-
+        # Mappings
         self._sym_editor.destroy()
-        self._sym_editor = SymbolMapEditor(self._tab_connection, cfg.get("symbol_map", {}))
+        self._sym_editor = SymbolMapEditor(self._tab_mappings, cfg.get("symbol_map", {}))
         self._sym_editor.pack(fill="x", padx=24, pady=(4, 16))
 
     def _save(self):
@@ -950,37 +974,11 @@ class SettingsWindow(tk.Tk):
             "offset_readjust_threshold_pips": _safe_float(self._readjust_threshold.get(), 2.0),
         }
 
-        tp_vals, tp_units, trail_vals, trail_units = self._tp_override_editor.get_data()
-        cfg["tp"] = {
-            "profit_threshold": {
-                "unit": "pips",
-                "default": _safe_float(self._tp_default.get(), 7),
-                "per_instrument": tp_vals,
-                "per_instrument_unit": tp_units,
-            },
-            "trail": {
-                "unit": "pips",
-                "default": _safe_float(self._trail_default.get(), 3),
-                "per_instrument": trail_vals,
-                "per_instrument_unit": trail_units,
-            },
-            "partial_close_percent": _safe_int(self._partial_pct.get(), 50),
-        }
-
+        cfg["tp"] = self._tp_editor.get_data()
         cfg["symbol_map"] = self._sym_editor.get_map()
         save_config(cfg)
         self._cfg = cfg
 
-        # MT5 creds only — SUPABASE_DB_URL is managed via _prompt_db_url
-        login = self._mt5_login.get().strip()
-        pwd   = self._mt5_password.get().strip()
-        srv   = self._mt5_server.get().strip()
-        for key, val in [("MT5_LOGIN", login), ("MT5_PASSWORD", pwd), ("MT5_SERVER", srv)]:
-            if val:
-                self._env[key] = val
-            elif key in self._env:
-                del self._env[key]
-        save_env(self._env)
 
         self._log_panel.append("✓ Settings saved.", "INFO")
         messagebox.showinfo("Saved", "Settings saved successfully.", parent=self)
@@ -1014,11 +1012,6 @@ class SettingsWindow(tk.Tk):
                 "Please enter a valid license key before starting the bot.", parent=self)
             self._nb.select(0)
             return
-        if not self._env.get("SUPABASE_DB_URL", "").strip():
-            messagebox.showerror("Database URL Required",
-                "Please set the Supabase database URL in the Connection tab.", parent=self)
-            self._nb.select(4)
-            return
 
         self._save()
 
@@ -1033,7 +1026,7 @@ class SettingsWindow(tk.Tk):
         self._start_btn.bind("<Leave>", lambda e: self._start_btn.config(bg=RED))
         self._status_lbl.config(text="● Running", fg=GREEN)
         self._log_panel.append("Bot started.", "INFO")
-        self._nb.select(5)
+        self._nb.select(4)
 
         self._log_thread = threading.Thread(target=self._stream_logs, daemon=True)
         self._log_thread.start()
