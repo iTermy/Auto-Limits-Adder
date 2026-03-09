@@ -34,6 +34,33 @@ ORDER_FILLING_RETURN = 2   # IOC-like; most brokers accept this for pending orde
 # Connection
 # ---------------------------------------------------------------------------
 
+def _find_mt5_terminal() -> Optional[str]:
+    """
+    Scan common MT5 install locations and return the first terminal64.exe found.
+    Returns None if not found (mt5.initialize() will attempt auto-detection).
+    """
+    import os
+    search_roots = [
+        os.environ.get("PROGRAMFILES", r"C:\Program Files"),
+        os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
+        os.path.expanduser("~\\AppData\\Roaming"),
+    ]
+    for root in search_roots:
+        if not root or not os.path.isdir(root):
+            continue
+        try:
+            for entry in os.scandir(root):
+                if not entry.is_dir():
+                    continue
+                candidate = os.path.join(entry.path, "terminal64.exe")
+                if os.path.isfile(candidate):
+                    logger.info(f"Found MT5 terminal at: {candidate}")
+                    return candidate
+        except PermissionError:
+            continue
+    return None
+
+
 def connect(login: int = None, password: str = None, server: str = None) -> bool:
     """
     Initialise the MT5 terminal.
@@ -51,10 +78,24 @@ def connect(login: int = None, password: str = None, server: str = None) -> bool
     if login and password and server:
         kwargs = {"login": int(login), "password": password, "server": server}
 
+    # Try auto-detecting the terminal path first
+    terminal_path = _find_mt5_terminal()
+    if terminal_path:
+        kwargs["path"] = terminal_path
+
     if not mt5.initialize(**kwargs):
         err = mt5.last_error()
-        logger.error(f"MT5 initialize failed: {err}")
-        return False
+        # If it failed with a detected path, retry without it as a fallback
+        if terminal_path:
+            logger.warning(f"MT5 init failed with detected path, retrying without path...")
+            kwargs.pop("path", None)
+            if not mt5.initialize(**kwargs):
+                err = mt5.last_error()
+                logger.error(f"MT5 initialize failed: {err}")
+                return False
+        else:
+            logger.error(f"MT5 initialize failed: {err}")
+            return False
 
     account = mt5.account_info()
     if account is None:

@@ -1,2 +1,2 @@
-asyncpg>=0.29.0
+cd C:\Python Stuff\Auto-Limits-Botcdasyncpg>=0.29.0
 MetaTrader5>=5.0.45   # Windows only

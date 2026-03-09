@@ -4,3 +4,16 @@ __pycache__/
 *.pyc
 .env
 bot.log
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Local state
+orders.db
+config.json
+
+# OS
+.DS_Store
+Thumbs.db

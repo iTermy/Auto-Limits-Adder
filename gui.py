@@ -60,18 +60,10 @@ FONT_TITLE = ("Segoe UI", 11, "bold")
 FONT_MONO  = ("Consolas", 8)
 
 # ─────────────────────────────────────────────
-# Config helpers
+# Config helpers — delegated to config.py
 # ─────────────────────────────────────────────
 
-def load_config() -> dict:
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-
-def save_config(cfg: dict) -> None:
-    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=2)
+from config import load_config, save_config, default_config as _default_config
 
 def load_env() -> dict:
     env = {}

@@ -56,10 +56,11 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def load_config(path: str = "config.json") -> dict:
+    from config import load_config as _load, CONFIG_PATH
     config_path = Path(path)
     if not config_path.exists():
-        logger.critical(f"config.json not found at '{config_path.resolve()}'")
-        sys.exit(1)
+        logger.info("config.json not found — creating with defaults.")
+        return _load()  # config.py auto-creates and returns defaults
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     logger.info(f"Config loaded from '{config_path}'.")
