@@ -22,7 +22,6 @@ import signal
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
 
 # When compiled/frozen, resolve paths relative to the exe; otherwise use the script directory.
 _is_compiled = getattr(sys, "frozen", False) or "__compiled__" in dir(sys)

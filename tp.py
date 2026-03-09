@@ -506,6 +506,7 @@ class TPEngine:
             live_data = live_positions[ticket]
             live_data["signal_id"] = pos["signal_id"]
             live_data["limit_id"]  = pos["limit_id"]
+            live_data["is_scalp"]  = pos.get("is_scalp", False)
             self._positions[ticket] = live_data
             by_signal.setdefault(pos["signal_id"], []).append(live_data)
 

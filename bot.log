@@ -172,3 +172,300 @@
 2026-03-09 02:14:35  INFO      sync — ✅  Spread hour cleared.
 2026-03-09 02:14:35  INFO      sync — _sync_orders: fetched 0 active signals
 2026-03-09 02:14:40  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:17:56  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-09 02:17:56  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-09 02:17:56  INFO      __main__ — Connecting to MT5...
+2026-03-09 02:17:56  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-09 02:17:56  INFO      __main__ — Connecting to Supabase...
+2026-03-09 02:17:56  INFO      db — Supabase connection pool created.
+2026-03-09 02:17:56  INFO      __main__ — MT5 account: 52776073
+2026-03-09 02:17:57  INFO      license — License validated OK (MT5: 52776073, discord_id: 582358569542877184).
+2026-03-09 02:17:57  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
+2026-03-09 02:17:57  INFO      sync — Running startup reconciliation...
+2026-03-09 02:17:57  INFO      sync — No pending local mappings to reconcile.
+2026-03-09 02:17:57  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-09 02:17:57  INFO      sync — ✅  News mode cleared.
+2026-03-09 02:17:57  INFO      sync — ✅  Spread hour cleared.
+2026-03-09 02:17:57  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:02  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:08  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:13  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:19  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:24  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:30  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:35  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:41  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:46  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:52  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:18:57  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:02  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:08  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:14  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:19  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:25  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:30  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:36  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:42  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:48  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:54  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:19:59  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:05  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:11  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:17  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:22  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:27  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:33  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:39  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:44  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:49  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:20:55  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:00  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:06  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:11  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:17  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:22  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:28  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:33  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:38  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:44  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:49  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:21:55  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:00  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:06  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:11  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:17  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:22  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:28  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:33  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:39  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:44  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:50  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:22:55  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:23:01  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:23:07  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:23:12  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:12  INFO      sync — Limit 747 (AAPL.NAS @ 271.18000) is 16530.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 748 (AAPL.NAS @ 271.40000) is 16750.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 749 (AAPL.NAS @ 272.44000) is 17790.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 750 (AAPL.NAS @ 272.73000) is 18080.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 751 (AAPL.NAS @ 278.15000) is 23500.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 752 (AAPL.NAS @ 278.62000) is 23970.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 753 (AAPL.NAS @ 279.00000) is 24350.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 754 (AAPL.NAS @ 279.50000) is 24850.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 755 (AAPL.NAS @ 280.00000) is 25350.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 756 (AAPL.NAS @ 280.73000) is 26080.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 757 (AAPL.NAS @ 281.23000) is 26580.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 758 (AMD.NAS @ 176.53000) is 11825.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 759 (AMD.NAS @ 176.25000) is 12105.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 760 (AMD.NAS @ 174.41000) is 13945.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 761 (AMD.NAS @ 172.85000) is 15505.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 762 (AMD.NAS @ 172.53000) is 15825.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 763 (AMD.NAS @ 171.62000) is 16735.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 784 (BIDU.NAS @ 110.13000) is 9150.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 785 (BIDU.NAS @ 109.36000) is 9920.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 786 (BIDU.NAS @ 109.09000) is 10190.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 787 (BIDU.NAS @ 108.66000) is 10620.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 788 (BIDU.NAS @ 108.01000) is 11270.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 870 (AMZN.NAS @ 227.42000) is 18265.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 871 (AMZN.NAS @ 228.04000) is 18885.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 872 (AMZN.NAS @ 228.80000) is 19645.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 873 (AMZN.NAS @ 230.00000) is 20845.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 874 (AMZN.NAS @ 231.66000) is 22505.0 pips away (threshold 300.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 1010 (XAUUSD @ 4976.60000) is 15125.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:12  INFO      sync — Limit 1011 (XAUUSD @ 4975.70000) is 15215.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1014 (XAUUSD @ 4943.90000) is 18395.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1015 (XAUUSD @ 4937.60000) is 19025.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1016 (XAUUSD @ 4933.80000) is 19405.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1017 (XAUUSD @ 4926.60000) is 20125.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1018 (XAUUSD @ 4911.90000) is 21595.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1019 (XAUUSD @ 4907.30000) is 22055.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1020 (XAUUSD @ 4947.60000) is 18031.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1021 (XAUUSD @ 4946.60000) is 18131.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1022 (XAUUSD @ 4937.70000) is 19021.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1023 (XAUUSD @ 4933.70000) is 19421.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1025 (XAUUSD @ 4911.60000) is 21631.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:13  INFO      sync — Limit 1026 (XAUUSD @ 4907.80000) is 22011.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:14  INFO      mt5 — Placed buy_limit order: ticket=1520454133, symbol=EURUSD, lot=0.54, price=1.1474900000000001, sl=1.14509
+2026-03-09 02:23:14  INFO      sync — Placed buy_limit: ticket=1520454133, symbol=EURUSD, lot=0.54, price=1.14749 (db=1.14748, offset=+0.00000, spread=0.00001), sl=1.14509, limit_id=1036, signal_id=305
+2026-03-09 02:23:14  INFO      mt5 — Placed buy_limit order: ticket=1520454242, symbol=EURUSD, lot=0.54, price=1.1471500000000001, sl=1.14509
+2026-03-09 02:23:14  INFO      sync — Placed buy_limit: ticket=1520454242, symbol=EURUSD, lot=0.54, price=1.14715 (db=1.14714, offset=+0.00000, spread=0.00001), sl=1.14509, limit_id=1037, signal_id=305
+2026-03-09 02:23:14  INFO      mt5 — Placed buy_limit order: ticket=1520454263, symbol=EURUSD, lot=0.54, price=1.14701, sl=1.1451
+2026-03-09 02:23:14  INFO      sync — Placed buy_limit: ticket=1520454263, symbol=EURUSD, lot=0.54, price=1.14701 (db=1.14701, offset=+0.00000, spread=0.00000), sl=1.14510, limit_id=1038, signal_id=305
+2026-03-09 02:23:14  INFO      mt5 — Placed buy_limit order: ticket=1520454275, symbol=EURUSD, lot=0.54, price=1.1465, sl=1.14509
+2026-03-09 02:23:14  INFO      sync — Placed buy_limit: ticket=1520454275, symbol=EURUSD, lot=0.54, price=1.14650 (db=1.14649, offset=+0.00000, spread=0.00001), sl=1.14509, limit_id=1039, signal_id=305
+2026-03-09 02:23:14  INFO      sync — Limit 1045 (XAUUSD @ 5155.30000) is 2720.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:14  INFO      sync — Limit 1046 (XAUUSD @ 5158.50000) is 3040.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1047 (XAUUSD @ 5164.10000) is 3600.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1052 (XAUUSD @ 5231.30000) is 10320.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1053 (XAUUSD @ 5233.00000) is 10490.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1054 (XAUUSD @ 5234.20000) is 10610.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1055 (XAUUSD @ 5245.30000) is 11720.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1056 (XAUUSD @ 5247.20000) is 11910.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1057 (XAUUSD @ 5257.00000) is 12890.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1058 (XAUUSD @ 5257.40000) is 12880.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1059 (XAUUSD @ 5215.70000) is 8710.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1060 (XAUUSD @ 5216.00000) is 8740.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1061 (XAUUSD @ 5216.70000) is 8810.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1065 (XAUUSD @ 5284.10000) is 15550.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1066 (XAUUSD @ 5285.00000) is 15640.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1067 (XAUUSD @ 5286.20000) is 15760.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1068 (XAUUSD @ 5290.00000) is 16140.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1069 (XAUUSD @ 5311.00000) is 18240.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1070 (XAUUSD @ 5312.30000) is 18370.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1076 (XAUUSD @ 5320.40000) is 19180.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1077 (XAUUSD @ 5320.80000) is 19220.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1078 (XAUUSD @ 5328.20000) is 19960.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1079 (XAUUSD @ 5351.30000) is 22270.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1080 (XAUUSD @ 5353.00000) is 22440.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1081 (XAUUSD @ 5356.40000) is 22780.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1082 (XAUUSD @ 5390.40000) is 26178.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1083 (XAUUSD @ 5393.30000) is 26468.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1084 (XAUUSD @ 5402.30000) is 27368.5 pips away (threshold 500.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1085 (USDJPY @ 159.37200) is 894.5 pips away (threshold 200.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1086 (USDJPY @ 159.40000) is 922.5 pips away (threshold 200.0) — deferring until price comes within range.
+2026-03-09 02:23:15  INFO      sync — Limit 1087 (USDJPY @ 159.45000) is 972.5 pips away (threshold 200.0) — deferring until price comes within range.
+2026-03-09 02:23:20  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:21  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-09 02:23:21  INFO      __main__ — Shutting down...
+2026-03-09 02:23:21  INFO      db — Supabase connection pool closed.
+2026-03-09 02:23:21  INFO      mt5 — MT5 disconnected.
+2026-03-09 02:23:21  INFO      __main__ — Shutdown complete.
+2026-03-09 02:23:27  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-09 02:23:27  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-09 02:23:27  INFO      __main__ — Connecting to MT5...
+2026-03-09 02:23:27  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-09 02:23:27  INFO      __main__ — Connecting to Supabase...
+2026-03-09 02:23:27  INFO      db — Supabase connection pool created.
+2026-03-09 02:23:27  INFO      __main__ — MT5 account: 52776073
+2026-03-09 02:23:27  INFO      license — License validated OK (MT5: 52776073, discord_id: 582358569542877184).
+2026-03-09 02:23:27  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
+2026-03-09 02:23:27  INFO      sync — Running startup reconciliation...
+2026-03-09 02:23:27  INFO      sync — Startup reconciliation complete.
+2026-03-09 02:23:27  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-09 02:23:27  INFO      sync — ✅  News mode cleared.
+2026-03-09 02:23:27  INFO      sync — ✅  Spread hour cleared.
+2026-03-09 02:23:27  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:34  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:39  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:45  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:51  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:23:56  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:02  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:07  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:13  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:18  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:24  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:29  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:35  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:40  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:46  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:51  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:24:57  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:02  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:08  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:14  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:19  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:25  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:30  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:36  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:42  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:47  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:53  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:25:59  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:04  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:10  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:15  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:21  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:27  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:32  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:38  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:43  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:49  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:26:54  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:00  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:06  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:11  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:17  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:22  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:28  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:33  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:39  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:45  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:51  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:27:56  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:02  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:07  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:13  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:19  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:24  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:30  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:36  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:41  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:47  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:52  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:28:58  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:03  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:09  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:14  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:20  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:26  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:31  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:37  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:43  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:48  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:29:54  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:00  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:05  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:11  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:16  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:22  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:27  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:33  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:38  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:44  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:49  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:30:55  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:01  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:06  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:12  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:17  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:23  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:28  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:34  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:39  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:45  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:51  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:31:56  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:02  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:08  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:13  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:19  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:24  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:30  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:36  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:41  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:47  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:53  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:32:58  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:33:05  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:33:10  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:33:16  INFO      sync — _sync_orders: fetched 24 active signals
+2026-03-09 02:33:22  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
+2026-03-09 02:33:22  INFO      __main__ — Shutting down...
+2026-03-09 02:33:22  INFO      db — Supabase connection pool closed.
+2026-03-09 02:33:22  INFO      mt5 — MT5 disconnected.
+2026-03-09 02:33:22  INFO      __main__ — Shutdown complete.
+2026-03-09 02:33:35  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-09 02:33:35  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-09 02:33:35  INFO      __main__ — Connecting to MT5...
+2026-03-09 02:33:35  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-09 02:33:35  INFO      __main__ — Connecting to Supabase...
+2026-03-09 02:33:35  INFO      db — Supabase connection pool created.
+2026-03-09 02:33:35  INFO      __main__ — MT5 account: 52776073
+2026-03-09 02:33:35  INFO      license — License validated OK (MT5: 52776073, discord_id: 582358569542877184).
+2026-03-09 02:33:35  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
+2026-03-09 02:33:35  INFO      sync — Running startup reconciliation...
+2026-03-09 02:33:35  INFO      sync — Startup reconciliation complete.
+2026-03-09 02:33:35  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-09 02:33:35  INFO      sync — ✅  News mode cleared.
+2026-03-09 02:33:35  INFO      sync — ✅  Spread hour cleared.
