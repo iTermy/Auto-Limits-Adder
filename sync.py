@@ -656,6 +656,7 @@ class SyncEngine:
 
     async def _sync_orders(self) -> None:
         signals = await supabase_db.fetch_active_signals_with_pending_limits(self.pool)
+        logger.info(f"_sync_orders: fetched {len(signals)} active signals")
         signals = [s for s in signals if signal_passes_filter(s, self.filters)]
 
         db_pending: dict[int, dict] = {}

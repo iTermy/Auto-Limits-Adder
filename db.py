@@ -29,7 +29,12 @@ _RO_DSN = ""
 
 async def create_pool() -> asyncpg.Pool:
     """Create and return an asyncpg connection pool using the hardcoded read-only DSN."""
-    pool = await asyncpg.create_pool(dsn=_RO_DSN, min_size=1, max_size=5)
+    pool = await asyncpg.create_pool(
+        dsn=_RO_DSN,
+        min_size=1,
+        max_size=5,
+        server_settings={"search_path": "public"},
+    )
     logger.info("Supabase connection pool created.")
     return pool
 
