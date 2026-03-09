@@ -24,6 +24,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+# When compiled/frozen, resolve paths relative to the exe; otherwise use the script directory.
+_is_compiled = getattr(sys, "frozen", False) or "__compiled__" in dir(sys)
+BASE_DIR = Path(sys.executable).parent if _is_compiled else Path(__file__).parent
+os.chdir(BASE_DIR)
+
 import db as supabase_db
 import local_db
 import mt5 as mt5_api

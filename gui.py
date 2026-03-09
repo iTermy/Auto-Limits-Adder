@@ -32,7 +32,7 @@ if "--bot" in sys.argv:
 # ─────────────────────────────────────────────
 # Paths
 # ─────────────────────────────────────────────
-BASE_DIR    = Path(__file__).parent.resolve()
+BASE_DIR    = (Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent).resolve()
 CONFIG_PATH = BASE_DIR / "config.json"
 ENV_PATH    = BASE_DIR / ".env"
 
@@ -1142,7 +1142,7 @@ class SettingsWindow(tk.Tk):
         self._start_btn.bind("<Enter>", lambda e: self._start_btn.config(bg=RED_HO))
         self._start_btn.bind("<Leave>", lambda e: self._start_btn.config(bg=RED))
         self._status_lbl.config(text="● Running", fg=GREEN)
-        self._log_panel.append("Bot started.", "INFO")
+        self._log_panel.append("Bot started. [build v2 - BASE_DIR fix]", "INFO")
         self._nb.select(4)
 
         self._log_thread = threading.Thread(target=self._stream_logs, daemon=True)
