@@ -73,6 +73,231 @@ MAGIC = 20240001   # Unique magic number for all orders placed by this bot
 
 
 # ---------------------------------------------------------------------------
+# Bot mode monitor — news_mode / spread_hour
+# ---------------------------------------------------------------------------
+
+class BotModeMonitor:
+    """
+    Polls the bot_mode_status table every cycle and fires cancel/restore
+    actions when news_mode or spread_hour transitions between states.
+
+    State machine per flag:
+        False → True  : cancel all pending MT5 orders + mark them cancelled
+                         locally; record the limit_ids so they can be restored.
+        True  → False : delete those cancelled local rows so the sync engine's
+                         diff sees them as untracked and re-places them on the
+                         next _sync_orders() pass.
+
+    The monitor intentionally does *not* touch filled positions or the TP
+    engine — open trades continue to be managed normally.
+    """
+
+    def __init__(self) -> None:
+        # Last known state of each flag (None = not yet polled)
+        self._news_mode:   Optional[bool] = None
+        self._spread_hour: Optional[bool] = None
+
+        # limit_ids cancelled due to an active mode pause.
+        # Stored so we can purge those cancelled rows when the pause ends.
+        self._paused_limit_ids: set[int] = set()
+
+    @property
+    def is_paused(self) -> bool:
+        """True while any mode flag is active."""
+        return bool(self._news_mode or self._spread_hour)
+
+    async def check(self, pool) -> None:
+        """
+        Fetch the latest bot_mode_status row and react to any flag transitions.
+        Call once per run_cycle(), *before* _sync_orders().
+        """
+        row = await supabase_db.fetch_bot_mode_status(pool)
+        if row is None:
+            # Table empty or unreachable — treat as both flags off.
+            new_news   = False
+            new_spread = False
+        else:
+            new_news   = bool(row.get("news_mode",   False))
+            new_spread = bool(row.get("spread_hour", False))
+
+        prev_paused = self.is_paused
+
+        # Detect individual flag changes for logging clarity
+        if self._news_mode != new_news:
+            if new_news:
+                logger.warning("⚠️  NEWS MODE activated — cancelling all pending orders.")
+            else:
+                logger.info("✅  News mode cleared.")
+        if self._spread_hour != new_spread:
+            if new_spread:
+                logger.warning("⚠️  SPREAD HOUR activated — cancelling all pending orders.")
+            else:
+                logger.info("✅  Spread hour cleared.")
+
+        self._news_mode   = new_news
+        self._spread_hour = new_spread
+        now_paused = self.is_paused
+
+        if not prev_paused and now_paused:
+            # Transition INTO a paused state — cancel everything pending
+            self._cancel_all_pending()
+        elif prev_paused and not now_paused:
+            # Transition OUT of pause — purge cancelled rows so orders re-place
+            self._restore_paused_limits()
+
+    def _cancel_all_pending(self) -> None:
+        """Cancel every pending MT5 order and record the limit_ids affected."""
+        pending = local_db.get_pending_mappings()
+        if not pending:
+            logger.info("Bot mode pause: no pending orders to cancel.")
+            return
+
+        cancelled_count = 0
+        for mapping in pending:
+            ticket   = mapping["mt5_ticket"]
+            limit_id = mapping["limit_id"]
+            success  = mt5_api.cancel_pending_order(ticket)
+            if success:
+                local_db.mark_cancelled(ticket)
+                self._paused_limit_ids.add(limit_id)
+                cancelled_count += 1
+            else:
+                # Order may have just filled — _detect_fills will handle it
+                logger.warning(
+                    f"Bot mode pause: could not cancel ticket {ticket} "
+                    f"(limit_id={limit_id}) — may have filled."
+                )
+
+        logger.info(
+            f"Bot mode pause: cancelled {cancelled_count}/{len(pending)} "
+            f"pending order(s)."
+        )
+
+    def _restore_paused_limits(self) -> None:
+        """
+        After a pause ends, delete the 'cancelled' local DB rows for the
+        limits that were paused.  The sync engine will see them as untracked
+        and re-place them on the next cycle.
+        """
+        if not self._paused_limit_ids:
+            logger.info("Bot mode cleared: no paused limits to restore.")
+            return
+
+        limit_ids = list(self._paused_limit_ids)
+        deleted   = local_db.delete_cancelled_for_limit_ids(limit_ids)
+        logger.info(
+            f"Bot mode cleared: purged {deleted} cancelled row(s) for "
+            f"{len(limit_ids)} limit(s) — orders will be re-placed next cycle."
+        )
+        self._paused_limit_ids.clear()
+
+
+# ---------------------------------------------------------------------------
+# Forced exit monitor — manual cancel / breakeven on hit signals
+# ---------------------------------------------------------------------------
+
+class ForcedExitMonitor:
+    """
+    Detects when the operator manually marks a signal as 'cancelled' or
+    'breakeven' after at least one of its limits has already filled and an
+    open position exists.
+
+    On every cycle it fetches fresh signal rows for any signal_id that has
+    filled positions in orders.db and compares the DB status against the
+    last-known status.  If a transition to 'cancelled' or 'breakeven' is
+    detected the TP engine is told to close every tracked open position for
+    that signal at market immediately.
+
+    Specifically excluded (these must NOT trigger forced exits):
+      • 'profit'     — the bot's own TP logic handles this; DB may mark profit
+                        before our trailing stop has fired.
+      • 'stop_loss'  — MT5's native SL on each position handles this.
+      • 'active'/'hit' — still live, nothing to do.
+      • Any status change on a signal that has NO filled positions — there are
+                        no open MT5 positions to close.
+
+    Why transition-based and not simply "check every cycle":
+      Once we've acted on a cancellation we must not fire again next cycle
+      even though the status is still 'cancelled'.  Tracking last-known status
+      per signal solves this with no DB writes.
+    """
+
+    FORCE_EXIT_STATUSES = frozenset({"cancelled", "breakeven"})
+
+    def __init__(self) -> None:
+        # signal_id → last status string seen by this monitor
+        self._last_status: dict[int, str] = {}
+
+    async def check(self, pool, tp_engine) -> None:
+        """
+        Fetch fresh status for every signal that has filled positions locally.
+        Call once per run_cycle(), after _detect_fills() so newly filled
+        positions are already registered.
+
+        tp_engine.force_close_signal() is called for any signal that requires
+        a forced exit — it closes all tracked open positions at market.
+        """
+        # Find all signal_ids that have at least one filled (open) position
+        # in our local DB.  The TP engine's _positions registry mirrors this.
+        filled_signal_ids = local_db.get_signal_ids_with_filled_positions()
+        if not filled_signal_ids:
+            self._last_status.clear()
+            return
+
+        # Fetch current DB status for all of these signals in one round-trip.
+        # fetch_signals_by_ids returns rows for final-status signals too, unlike
+        # fetch_active_signals which only returns active/hit rows.
+        rows = await supabase_db.fetch_signals_by_ids(pool, list(filled_signal_ids))
+        current_status_by_id: dict[int, str] = {r["id"]: r["status"] for r in rows}
+
+        for signal_id in filled_signal_ids:
+            current = current_status_by_id.get(signal_id)
+            if current is None:
+                # Row deleted or inaccessible — skip.
+                continue
+
+            previous = self._last_status.get(signal_id)
+
+            # Always update the cache, before any continue/return.
+            self._last_status[signal_id] = current
+
+            if current not in self.FORCE_EXIT_STATUSES:
+                # Not a forced-exit status — nothing to do.
+                continue
+
+            if previous == current:
+                # Status hasn't changed since last cycle — we already acted on
+                # this transition (or these positions weren't open last cycle).
+                continue
+
+            # --- Transition detected into a forced-exit status ---
+            # Extra guard: only act when the signal was previously 'hit'.
+            # A signal that goes active → cancelled (all limits still pending,
+            # none filled yet) has no open MT5 positions and should be handled
+            # purely by the regular _sync_orders pending-cancel path.
+            if previous != "hit":
+                logger.debug(
+                    f"ForcedExitMonitor: signal {signal_id} is now {current!r} "
+                    f"(was {previous!r}) — previous status was not 'hit', so no "
+                    f"positions to force-close (regular pending-cancel path applies)."
+                )
+                continue
+
+            logger.warning(
+                f"ForcedExitMonitor: signal {signal_id} manually set to "
+                f"{current!r} (was {previous!r}) with open positions — "
+                f"forcing market close of all tracked positions."
+            )
+            tp_engine.force_close_signal(signal_id, reason=f"manual_{current}")
+
+        # Prune stale cache entries for signal_ids we no longer track.
+        self._last_status = {
+            sid: st for sid, st in self._last_status.items()
+            if sid in filled_signal_ids
+        }
+
+
+# ---------------------------------------------------------------------------
 # Asset class detection
 # ---------------------------------------------------------------------------
 
@@ -299,6 +524,12 @@ class SyncEngine:
         self._last_readjust:    float = 0.0   # monotonic time of last offset readjust pass
         self._last_lot_recheck: float = 0.0   # monotonic time of last lot-size recheck pass
 
+        # Bot mode monitor — pauses order placement during news / spread hour
+        self._mode_monitor = BotModeMonitor()
+
+        # Forced exit monitor — closes open positions on manual cancel/breakeven
+        self._forced_exit_monitor = ForcedExitMonitor()
+
     # ------------------------------------------------------------------
     # Proximity filter
     # ------------------------------------------------------------------
@@ -355,8 +586,23 @@ class SyncEngine:
                     "License invalid — skipping order placement this cycle. "
                     "TP engine and fill detection still running for open positions."
                 )
-                # Still run fill detection and TP so open positions are managed
                 await self._detect_fills()
+                # Check for forced exits even when license is invalid — open
+                # positions should still be closeable on manual cancel/breakeven.
+                await self._forced_exit_monitor.check(self.pool, self.tp_engine)
+                self.tp_engine.run_tick()
+                return
+
+            # Check bot mode flags first — cancels pending orders if a news/spread
+            # pause just started, restores them (by clearing cancelled rows) if it ended.
+            await self._mode_monitor.check(self.pool)
+
+            # Skip order sync and readjustment while any mode flag is active.
+            # Fill detection, forced exits, and TP always run so open positions
+            # are still managed correctly.
+            if self._mode_monitor.is_paused:
+                await self._detect_fills()
+                await self._forced_exit_monitor.check(self.pool, self.tp_engine)
                 self.tp_engine.run_tick()
                 return
 
@@ -364,7 +610,10 @@ class SyncEngine:
             await self._sync_filled_position_sls()
             await self._maybe_readjust_offset_orders()
             await self._maybe_recheck_lot_sizes()
+            # Detect fills before forced-exit check so newly filled positions
+            # are registered in the TP engine before we decide to close them.
             await self._detect_fills()
+            await self._forced_exit_monitor.check(self.pool, self.tp_engine)
             self.tp_engine.run_tick()
         except Exception as exc:
             logger.exception(f"Unhandled error in sync cycle: {exc}")

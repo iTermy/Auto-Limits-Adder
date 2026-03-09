@@ -1106,8 +1106,17 @@ class SettingsWindow(tk.Tk):
 
         self._save()
 
+        # When compiled with Nuitka, sys.executable is the gui.exe itself.
+        # In that case, launch the separately-compiled main.exe instead.
+        _is_compiled = getattr(sys, "frozen", False) or "__compiled__" in dir(sys)
+        if _is_compiled:
+            _main_exe = BASE_DIR / "main.exe"
+            _cmd = [str(_main_exe)]
+        else:
+            _cmd = [sys.executable, str(BASE_DIR / "main.py")]
+
         self._bot_proc = subprocess.Popen(
-            [sys.executable, str(BASE_DIR / "main.py")],
+            _cmd,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             text=True, cwd=str(BASE_DIR), encoding="utf-8", errors="replace",
         )

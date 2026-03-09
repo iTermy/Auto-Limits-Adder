@@ -402,6 +402,73 @@ class TPEngine:
             f"lots={pos['volume']}"
         )
 
+    def force_close_signal(self, signal_id: int, reason: str = "forced") -> None:
+        """
+        Immediately close all tracked open positions for a signal at market.
+
+        Called by ForcedExitMonitor when the operator manually marks a signal
+        as 'cancelled' or 'breakeven' after limits have already filled.
+
+        Each position is closed at full volume.  The outcome is recorded as
+        the supplied reason string (e.g. 'manual_cancelled', 'manual_breakeven').
+        Positions that are no longer open in MT5 (closed externally between
+        cycles) are silently removed from the tracker.
+        """
+        positions_for_signal = [
+            (ticket, pos) for ticket, pos in list(self._positions.items())
+            if pos.get("signal_id") == signal_id
+        ]
+
+        if not positions_for_signal:
+            logger.info(
+                f"TPEngine.force_close_signal: no tracked positions for "
+                f"signal {signal_id} — nothing to close."
+            )
+            return
+
+        logger.warning(
+            f"TPEngine.force_close_signal: closing {len(positions_for_signal)} "
+            f"position(s) for signal {signal_id} (reason={reason})."
+        )
+
+        # Refresh live positions once so we have current volume and price.
+        live_positions = {p["ticket"]: p for p in mt5_api.get_open_positions()}
+
+        for ticket, pos in positions_for_signal:
+            symbol = pos.get("symbol", "")
+            live   = live_positions.get(ticket)
+
+            if live is None:
+                # Position already closed outside our control.
+                logger.info(
+                    f"TPEngine.force_close_signal: ticket {ticket} ({symbol}) "
+                    f"not found in live positions — removing from tracker."
+                )
+                self._record_outcome_sync(ticket, pos, "manual_close")
+                self._remove_position(ticket)
+                continue
+
+            volume = live.get("volume", pos.get("lot_size", 0.01))
+            success = mt5_api.close_position(
+                ticket, volume, symbol, comment=reason[:31]
+            )
+
+            if success:
+                logger.info(
+                    f"TPEngine.force_close_signal: closed ticket {ticket} "
+                    f"({symbol}), {volume} lots. Reason: {reason}."
+                )
+                prices = mt5_api.get_current_price(symbol)
+                pos_type = live.get("type", pos.get("type", 0))
+                close_price = (prices[0] if pos_type == 0 else prices[1]) if prices else None
+                self._record_outcome_sync(ticket, pos, reason, close_price=close_price)
+                self._remove_position(ticket)
+            else:
+                logger.error(
+                    f"TPEngine.force_close_signal: failed to close ticket {ticket} "
+                    f"({symbol}). Will retry next cycle."
+                )
+
     # ------------------------------------------------------------------
     # Tick loop
     # ------------------------------------------------------------------

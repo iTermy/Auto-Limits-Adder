@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Read-only connection (hardcoded — bot is distributed as a compiled binary)
 # ---------------------------------------------------------------------------
-# This role has SELECT-only access on: signals, limits, live_prices, licenses.
+# This role has SELECT-only access on: signals, limits, live_prices, licenses, bot_mode_status.
 # It cannot INSERT, UPDATE, DELETE, or access any other table.
 # Rotate this password via Supabase dashboard → Database → Roles if compromised.
 _RO_DSN = ""
@@ -245,6 +245,35 @@ async def fetch_live_prices_bulk(
     async with pool.acquire() as conn:
         rows = await conn.fetch(query, symbols)
     return {r["symbol"]: _record_to_dict(r) for r in rows}
+
+
+# ---------------------------------------------------------------------------
+# Bot mode status (news_mode / spread_hour flags)
+# ---------------------------------------------------------------------------
+
+async def fetch_bot_mode_status(pool: asyncpg.Pool) -> Optional[dict]:
+    """
+    Fetch the current bot mode flags from the bot_mode_status table.
+    Returns a dict with keys: id, news_mode, spread_hour, updated_at
+    Returns None if the table is empty or unreachable.
+
+    The table is expected to hold a single configuration row (always the
+    row with the highest id, so the alert bot can insert a new row to
+    push a state change without deleting history).
+    """
+    query = """
+        SELECT id, news_mode, spread_hour, updated_at
+        FROM bot_mode_status
+        ORDER BY id DESC
+        LIMIT 1
+    """
+    try:
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(query)
+        return _record_to_dict(row) if row else None
+    except Exception as exc:
+        logger.warning(f"fetch_bot_mode_status failed: {exc}")
+        return None
 
 
 # ---------------------------------------------------------------------------

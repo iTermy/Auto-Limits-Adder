@@ -415,3 +415,55 @@ def update_known_mt5_sl(
     with get_connection(db_path) as conn:
         conn.execute(sql, (db_stop_loss, mt5_sl, mt5_ticket))
         conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Bot-mode helpers (news_mode / spread_hour pause-and-restore)
+# ---------------------------------------------------------------------------
+
+def get_signal_ids_with_filled_positions(db_path: str = DB_PATH) -> set[int]:
+    """
+    Return all distinct signal_ids that have at least one order mapping with
+    status='filled'.  Used by ForcedExitMonitor to know which signals have
+    open positions we may need to force-close.
+
+    Note: 'filled' in local DB means the limit hit and a position was opened.
+    The position may have since been closed by the TP engine or externally —
+    the TP engine's own registry is the authoritative source for what is still
+    actually open.  The ForcedExitMonitor uses this set only to know which
+    signal_ids to query from the DB for status changes.
+    """
+    sql = "SELECT DISTINCT signal_id FROM order_mappings WHERE status = 'filled'"
+    with get_connection(db_path) as conn:
+        rows = conn.execute(sql).fetchall()
+    return {r["signal_id"] for r in rows}
+
+
+def delete_cancelled_for_limit_ids(limit_ids: list[int], db_path: str = DB_PATH) -> int:
+    """
+    Permanently delete 'cancelled' rows for the given limit_ids so the sync
+    engine's "place missing orders" diff sees them as untracked and re-places
+    them after a news/spread-hour pause ends.
+
+    Only cancelled rows are touched — filled rows (i.e. positions that were
+    opened before the pause) are never affected.
+
+    Returns the number of rows deleted.
+    """
+    if not limit_ids:
+        return 0
+    placeholders = ",".join("?" * len(limit_ids))
+    sql = f"""
+        DELETE FROM order_mappings
+        WHERE limit_id IN ({placeholders}) AND status = 'cancelled'
+    """
+    with get_connection(db_path) as conn:
+        cur = conn.execute(sql, limit_ids)
+        conn.commit()
+    deleted = cur.rowcount
+    if deleted:
+        logger.debug(
+            f"Purged {deleted} cancelled order_mapping row(s) "
+            f"for {len(limit_ids)} limit(s) to allow re-placement after mode clear."
+        )
+    return deleted

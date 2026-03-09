@@ -82,3 +82,18 @@
 2026-03-08 00:52:42  INFO      sync — Running startup reconciliation...
 2026-03-08 00:52:42  INFO      sync — No pending local mappings to reconcile.
 2026-03-08 00:52:42  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-08 20:48:30  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-08 20:48:30  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-08 20:48:30  INFO      __main__ — Connecting to MT5...
+2026-03-08 20:48:34  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-08 20:48:34  INFO      __main__ — Connecting to Supabase...
+2026-03-08 20:48:34  INFO      db — Supabase connection pool created.
+2026-03-08 20:48:34  INFO      __main__ — MT5 account: 52776073
+2026-03-08 20:48:34  INFO      license — License validated OK (MT5: 52776073, discord_id: 582358569542877184).
+2026-03-08 20:48:34  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
+2026-03-08 20:48:34  INFO      sync — Running startup reconciliation...
+2026-03-08 20:48:34  INFO      sync — No pending local mappings to reconcile.
+2026-03-08 20:48:34  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-08 20:48:34  WARNING   db — fetch_bot_mode_status failed: permission denied for table bot_mode_status
+2026-03-08 20:48:34  INFO      sync — ✅  News mode cleared.
+2026-03-08 20:48:34  INFO      sync — ✅  Spread hour cleared.
