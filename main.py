@@ -44,7 +44,12 @@ logging.basicConfig(
     format="%(asctime)s  %(levelname)-8s  %(name)s — %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
-        logging.StreamHandler(sys.stdout),
+        logging.StreamHandler(
+            # Force UTF-8 on Windows stdout to avoid cp1252 UnicodeEncodeErrors
+            # when log messages contain emoji/special characters (✅, →, ⚠️, etc.)
+            open(sys.stdout.fileno(), "w", encoding="utf-8", closefd=False)
+            if hasattr(sys.stdout, "fileno") else sys.stdout
+        ),
         logging.FileHandler("bot.log", encoding="utf-8"),
     ],
 )

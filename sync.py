@@ -505,7 +505,7 @@ class SyncEngine:
         self.risk_percent = self.execution.get("risk_percent", 5.0)
         self.min_lot      = self.execution.get("min_lot", 0.01)
         # How often (seconds) to recheck lot sizes + spread on live pending orders.
-        # Runs on a separate timer from offset readjustment.  Default 300s (5 min).
+        # Runs on a separate timer from offset readjustment.  Default 300s (5 min)
         self.lot_recheck_interval: float = self.execution.get("lot_recheck_interval_seconds", 300)
 
         # Proximity filter — limits farther than this many pips from current price
@@ -529,6 +529,31 @@ class SyncEngine:
 
         # Forced exit monitor — closes open positions on manual cancel/breakeven
         self._forced_exit_monitor = ForcedExitMonitor()
+
+        # Register TP-fired callback so TPEngine can cancel remaining pending
+        # orders when the first partial-close TP triggers for a signal.
+        self.tp_engine._on_tp_fired = self._cancel_pending_for_signal
+
+    def _cancel_pending_for_signal(self, signal_id: int) -> None:
+        """
+        Cancel all remaining pending MT5 orders and deferred limits for
+        *signal_id*.  Called by TPEngine the moment a partial-close TP fires —
+        once the trade is concluded we don't want further entries to fill.
+        """
+        pending_tickets = local_db.cancel_all_pending_for_signal(signal_id)
+        for ticket in pending_tickets:
+            logger.info(
+                f"TP fired for signal {signal_id} — cancelling remaining "
+                f"pending order ticket {ticket}"
+            )
+            mt5_api.cancel_pending_order(ticket)
+
+        removed = local_db.cancel_all_deferred_for_signal(signal_id)
+        if removed:
+            logger.info(
+                f"TP fired for signal {signal_id} — removed {removed} "
+                f"deferred limit(s)."
+            )
 
     # ------------------------------------------------------------------
     # Proximity filter
@@ -951,6 +976,12 @@ class SyncEngine:
             success = mt5_api.modify_position_sl(ticket, mt5_sl, symbol)
             if success:
                 local_db.update_known_mt5_sl(ticket, db_sl, mt5_sl)
+            else:
+                # Position not found (already closed externally or by TP engine).
+                # Reset last_known_mt5_sl to NULL so the next cycle enters the
+                # seed-only branch, checks live MT5, and silently skips if the
+                # position is still absent — preventing repeated warnings.
+                local_db.clear_known_mt5_sl(ticket)
 
 
     # ------------------------------------------------------------------

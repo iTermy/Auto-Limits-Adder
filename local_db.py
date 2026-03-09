@@ -417,6 +417,21 @@ def update_known_mt5_sl(
         conn.commit()
 
 
+def clear_known_mt5_sl(mt5_ticket: int, db_path: str = DB_PATH) -> None:
+    """
+    Reset last_known_mt5_sl to NULL for a ticket.
+
+    Called by _sync_filled_position_sls when modify_position_sl returns False
+    (position no longer exists in MT5).  Setting to NULL causes the SL sync to
+    enter the 'seed-only' branch on the next cycle, where it will silently skip
+    if the position is still absent — preventing repeated 'not found' warnings.
+    """
+    sql = "UPDATE order_mappings SET last_known_mt5_sl = NULL WHERE mt5_ticket = ?"
+    with get_connection(db_path) as conn:
+        conn.execute(sql, (mt5_ticket,))
+        conn.commit()
+
+
 # ---------------------------------------------------------------------------
 # Bot-mode helpers (news_mode / spread_hour pause-and-restore)
 # ---------------------------------------------------------------------------

@@ -355,6 +355,7 @@ class TPEngine:
         discord_id: str = "",
         license_key: str = "",
         bot_version: str = "",
+        on_tp_fired=None,
     ):
         self.config      = config
         self.strategy    = strategy or DefaultTPStrategy(config)
@@ -365,8 +366,16 @@ class TPEngine:
         self.license_key = license_key
         self.bot_version = bot_version
 
+        # Optional callback: on_tp_fired(signal_id) — called when a partial-close
+        # TP triggers for a signal so the caller can cancel remaining pending orders.
+        self._on_tp_fired = on_tp_fired
+
         # ticket → {ticket, signal_id, limit_id, symbol, lot_size, ...}
         self._positions: dict[int, dict] = {}
+
+        # Track which signal_ids have already had TP fired this session so we
+        # only invoke the callback once per signal (not on every subsequent tick).
+        self._tp_fired_signals: set[int] = set()
 
     # ------------------------------------------------------------------
     # Registration
@@ -594,6 +603,20 @@ class TPEngine:
                     trail_points = int(action.trail_pips * self._get_pip_points(symbol))
                     mt5_api.set_trailing_stop(ticket, trail_points, symbol)
 
+                # Cancel all remaining pending orders for this signal now that
+                # TP has fired — only invoke the callback once per signal.
+                signal_id = position.get("signal_id")
+                if signal_id is not None and signal_id not in self._tp_fired_signals:
+                    self._tp_fired_signals.add(signal_id)
+                    if self._on_tp_fired is not None:
+                        try:
+                            self._on_tp_fired(signal_id)
+                        except Exception as exc:
+                            logger.warning(
+                                f"TPEngine: on_tp_fired callback raised for signal "
+                                f"{signal_id}: {exc}"
+                            )
+
         elif action.action == "trail":
             trail_points = int(action.trail_pips * self._get_pip_points(symbol))
             mt5_api.set_trailing_stop(ticket, trail_points, symbol)
@@ -639,6 +662,11 @@ class TPEngine:
         except RuntimeError:
             pass  # No running event loop — skip recording
 
+    # DB check constraint only allows these outcome values.
+    _VALID_OUTCOMES = frozenset({
+        "tp_partial", "tp_trail_close", "sl", "breakeven_close", "manual_close"
+    })
+
     async def _record_outcome(
         self,
         ticket: int,
@@ -648,6 +676,12 @@ class TPEngine:
         context: Optional[TPContext] = None,
     ) -> None:
         """Build and insert a tp_outcomes row."""
+        # Normalise to the DB check-constraint's allowed set.  Reason strings
+        # like 'manual_breakeven' or 'manual_cancelled' come from
+        # ForcedExitMonitor and are not valid DB values — map them to
+        # 'manual_close' so the INSERT doesn't violate the constraint.
+        if outcome_type not in self._VALID_OUTCOMES:
+            outcome_type = "manual_close"
         symbol = position.get("symbol", "")
         lot_size = position.get("volume", position.get("lot_size"))
         fill_price = position.get("price_open")
