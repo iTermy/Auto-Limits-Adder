@@ -16,6 +16,20 @@ from pathlib import Path
 from tkinter import messagebox, scrolledtext, ttk
 
 # ─────────────────────────────────────────────
+# Bot-mode: when compiled into a single exe,
+# re-launching with --bot runs main() directly
+# instead of opening the GUI.
+# ─────────────────────────────────────────────
+if "--bot" in sys.argv:
+    # Run the bot entry point and exit — no GUI
+    import asyncio
+    # Ensure cwd is the exe's directory so config.json / orders.db resolve correctly
+    os.chdir(Path(sys.executable).parent if getattr(sys, "frozen", False) or "__compiled__" in dir(sys) else Path(__file__).parent)
+    from main import main as _bot_main
+    asyncio.run(_bot_main())
+    sys.exit(0)
+
+# ─────────────────────────────────────────────
 # Paths
 # ─────────────────────────────────────────────
 BASE_DIR    = Path(__file__).parent.resolve()
@@ -1107,19 +1121,22 @@ class SettingsWindow(tk.Tk):
         self._save()
 
         # When compiled with Nuitka, sys.executable is the gui.exe itself.
-        # In that case, launch the separately-compiled main.exe instead.
+        # Re-launch it with --bot so the single exe runs in bot mode.
         _is_compiled = getattr(sys, "frozen", False) or "__compiled__" in dir(sys)
         if _is_compiled:
-            _main_exe = BASE_DIR / "main.exe"
-            _cmd = [str(_main_exe)]
+            _cmd = [sys.executable, "--bot"]
         else:
             _cmd = [sys.executable, str(BASE_DIR / "main.py")]
 
-        self._bot_proc = subprocess.Popen(
-            _cmd,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            text=True, cwd=str(BASE_DIR), encoding="utf-8", errors="replace",
-        )
+        try:
+            self._bot_proc = subprocess.Popen(
+                _cmd,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                text=True, cwd=str(BASE_DIR), encoding="utf-8", errors="replace",
+            )
+        except FileNotFoundError as exc:
+            messagebox.showerror("Launch Error", f"Failed to start bot:\n{exc}", parent=self)
+            return
         self._running = True
         self._start_btn.config(text="■  Stop Bot", bg=RED)
         self._start_btn.bind("<Enter>", lambda e: self._start_btn.config(bg=RED_HO))
