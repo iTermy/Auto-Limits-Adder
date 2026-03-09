@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # This role has SELECT-only access on: signals, limits, live_prices, licenses, bot_mode_status.
 # It cannot INSERT, UPDATE, DELETE, or access any other table.
 # Rotate this password via Supabase dashboard → Database → Roles if compromised.
-_RO_DSN = ""
+_RO_DSN = "postgresql://execution_bot_ro.cqogevbfbrfzgbuxbhmn:oS%2495chu86HanS@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
 
 
 # ---------------------------------------------------------------------------

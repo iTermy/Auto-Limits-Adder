@@ -156,57 +156,19 @@
 2026-03-09 01:56:55  INFO      db — Supabase connection pool closed.
 2026-03-09 01:56:55  INFO      mt5 — MT5 disconnected.
 2026-03-09 01:56:55  INFO      __main__ — Shutdown complete.
-2026-03-09 01:57:27  INFO      __main__ — Config loaded from 'config.json'.
-2026-03-09 01:57:27  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
-2026-03-09 01:57:27  INFO      __main__ — Connecting to MT5...
-2026-03-09 01:57:27  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
-2026-03-09 01:57:27  INFO      __main__ — Connecting to Supabase...
-2026-03-09 01:57:28  INFO      db — Supabase connection pool created.
-2026-03-09 01:57:28  INFO      __main__ — MT5 account: 52776073
-2026-03-09 01:57:28  INFO      license — License validated OK (MT5: 52776073, discord_id: 582358569542877184).
-2026-03-09 01:57:28  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
-2026-03-09 01:57:28  INFO      sync — Running startup reconciliation...
-2026-03-09 01:57:28  INFO      sync — No pending local mappings to reconcile.
-2026-03-09 01:57:28  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
-2026-03-09 01:57:28  INFO      sync — ✅  News mode cleared.
-2026-03-09 01:57:28  INFO      sync — ✅  Spread hour cleared.
-2026-03-09 01:57:28  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:57:33  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:57:39  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:57:44  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:57:50  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:57:55  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:01  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:06  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:12  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:17  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:23  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:28  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:34  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:39  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:45  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:51  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:58:56  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:02  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:07  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:13  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:19  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:24  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:30  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:35  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:41  INFO      sync — _sync_orders: fetched 0 active signals
-2026-03-09 01:59:42  INFO      __main__ — Received signal 2 — initiating graceful shutdown.
-2026-03-09 01:59:42  INFO      __main__ — Shutting down...
-2026-03-09 01:59:42  INFO      db — Supabase connection pool closed.
-2026-03-09 01:59:42  INFO      mt5 — MT5 disconnected.
-2026-03-09 01:59:42  INFO      __main__ — Shutdown complete.
-2026-03-09 01:59:58  INFO      __main__ — Config loaded from 'config.json'.
-2026-03-09 01:59:58  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
-2026-03-09 01:59:58  INFO      __main__ — Connecting to MT5...
-2026-03-09 01:59:58  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
-2026-03-09 01:59:58  INFO      __main__ — Connecting to Supabase...
-2026-03-09 02:00:56  INFO      __main__ — Config loaded from 'config.json'.
-2026-03-09 02:00:56  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
-2026-03-09 02:00:56  INFO      __main__ — Connecting to MT5...
-2026-03-09 02:00:56  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
-2026-03-09 02:00:56  INFO      __main__ — Connecting to Supabase...
+2026-03-09 02:14:34  INFO      __main__ — Config loaded from 'config.json'.
+2026-03-09 02:14:34  INFO      local_db — Local SQLite DB initialised at 'orders.db'.
+2026-03-09 02:14:34  INFO      __main__ — Connecting to MT5...
+2026-03-09 02:14:34  INFO      mt5 — MT5 connected — account 52776073, balance 8477.53 USD, server ICMarketsSC-Demo
+2026-03-09 02:14:34  INFO      __main__ — Connecting to Supabase...
+2026-03-09 02:14:34  INFO      db — Supabase connection pool created.
+2026-03-09 02:14:34  INFO      __main__ — MT5 account: 52776073
+2026-03-09 02:14:35  INFO      license — License validated OK (MT5: 52776073, discord_id: 582358569542877184).
+2026-03-09 02:14:35  INFO      license — License heartbeat started — revalidating every 900s (MT5: 52776073).
+2026-03-09 02:14:35  INFO      sync — Running startup reconciliation...
+2026-03-09 02:14:35  INFO      sync — No pending local mappings to reconcile.
+2026-03-09 02:14:35  INFO      __main__ — Starting main loop (poll every 5s). Press Ctrl+C to stop.
+2026-03-09 02:14:35  INFO      sync — ✅  News mode cleared.
+2026-03-09 02:14:35  INFO      sync — ✅  Spread hour cleared.
+2026-03-09 02:14:35  INFO      sync — _sync_orders: fetched 0 active signals
+2026-03-09 02:14:40  INFO      sync — _sync_orders: fetched 0 active signals
