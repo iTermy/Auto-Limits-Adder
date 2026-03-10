@@ -855,19 +855,19 @@ class SettingsWindow(tk.Tk):
         _, adv_body = collapsible_section(p, "Advanced Settings")
 
         section_header(adv_body, "Proximity Filter")
-        info_note(adv_body, "Only place orders within the specified pip distance of the current price. "
-                            "Useful to avoid placing orders that are far from current price.")
-        self._prox_default = labeled_row(adv_body, "Default (pips)",
+        info_note(adv_body, "Only place orders within the specified distance of the current price. "
+                            "Forex uses pips. Metals, indices, stocks, crypto, and oil use dollars ($).")
+        self._prox_default = labeled_row(adv_body, "Default (forex: pips / others: $)",
             lambda f: make_spinbox(f, 10, 10000, 50))
         make_label(adv_body, "Per asset class overrides", dim=True,
                    font=FONT_SMALL).pack(anchor="w", padx=24, pady=(8, 2))
         self._prox_ac = {}
         prox_defaults = [
-            ("metals",  "Metals (pips)",  500),
-            ("forex",   "Forex (pips)",   200),
-            ("indices", "Indices (pips)", 1000),
-            ("crypto",  "Crypto (pips)",  2000),
-            ("stocks",  "Stocks (pips)",  300),
+            ("metals",  "Metals ($)",   50),
+            ("forex",   "Forex (pips)", 200),
+            ("indices", "Indices ($)",  200),
+            ("crypto",  "Crypto ($)",   500),
+            ("stocks",  "Stocks ($)",   10),
         ]
         for cls, label, _ in prox_defaults:
             sb = labeled_row(adv_body, f"  {label}",
@@ -992,7 +992,7 @@ class SettingsWindow(tk.Tk):
         self._prox_default.delete(0, tk.END)
         self._prox_default.insert(0, str(prox.get("default_pips", 500)))
         per_ac   = prox.get("per_asset_class", {})
-        defaults = {"metals": 500, "forex": 200, "indices": 1000, "crypto": 2000, "stocks": 300}
+        defaults = {"metals": 50, "forex": 200, "indices": 200, "crypto": 500, "stocks": 10}
         for cls, sb in self._prox_ac.items():
             sb.delete(0, tk.END)
             sb.insert(0, str(per_ac.get(cls, defaults[cls])))
@@ -1046,7 +1046,7 @@ class SettingsWindow(tk.Tk):
         }
 
         defaults_order = ["metals", "forex", "indices", "crypto", "stocks"]
-        default_pips   = [500, 200, 1000, 2000, 300]
+        default_pips   = [50, 200, 200, 500, 10]
         per_ac_prox = {
             cls: _safe_int(self._prox_ac[cls].get(), dp)
             for cls, dp in zip(defaults_order, default_pips)

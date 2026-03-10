@@ -559,10 +559,18 @@ class SyncEngine:
     # Proximity filter
     # ------------------------------------------------------------------
 
-    def _get_proximity_threshold_pips(self, instrument: str) -> float:
+    # Asset classes where proximity threshold is expressed in dollars (price units)
+    # rather than pips. Forex uses pips; everything else uses dollars.
+    _DOLLAR_PROXIMITY_CLASSES = frozenset({"metals", "indices", "stocks", "crypto", "oil"})
+
+    def _proximity_uses_dollars(self, instrument: str) -> bool:
+        return get_asset_class(instrument) in self._DOLLAR_PROXIMITY_CLASSES
+
+    def _get_proximity_threshold(self, instrument: str) -> float:
         """
-        Return the maximum pip distance from current price at which we will place
-        a pending order for this instrument. 0 means no limit (disabled).
+        Return the proximity threshold for this instrument.
+        Unit depends on asset class: dollars for metals/indices/stocks/crypto/oil,
+        pips for forex.
 
         Lookup priority: per_instrument > per_asset_class > default.
         """
@@ -583,21 +591,27 @@ class SyncEngine:
     ) -> bool:
         """
         Return True if the limit's price (already translated to MT5 space) is
-        within the configured pip threshold of the current MT5 mid price.
+        within the configured proximity threshold of the current MT5 mid price.
+
+        Forex: threshold is in pips.
+        Metals / indices / stocks / crypto / oil: threshold is in dollars (price units).
 
         Always returns True when the proximity filter is disabled or threshold is 0.
         """
         if not self.proximity_enabled:
             return True
 
-        threshold_pips = self._get_proximity_threshold_pips(instrument)
-        if threshold_pips <= 0:
+        threshold = self._get_proximity_threshold(instrument)
+        if threshold <= 0:
             return True
 
-        distance_pips = mt5_api.price_to_pips(
-            abs(db_price - current_mt5_mid), symbol
-        )
-        return distance_pips <= threshold_pips
+        raw_distance = abs(db_price - current_mt5_mid)
+
+        if self._proximity_uses_dollars(instrument):
+            return raw_distance <= threshold
+        else:
+            distance_pips = mt5_api.price_to_pips(raw_distance, symbol)
+            return distance_pips <= threshold
 
     # ------------------------------------------------------------------
     # Main cycle
@@ -651,27 +665,46 @@ class SyncEngine:
         logger.info("Running startup reconciliation...")
 
         pending_local = local_db.get_pending_mappings()
-        if not pending_local:
-            logger.info("No pending local mappings to reconcile.")
-            return
 
         live_order_tickets    = mt5_api.get_pending_order_tickets(MAGIC)
         live_position_tickets = mt5_api.get_open_position_tickets(MAGIC)
 
-        for mapping in pending_local:
-            ticket = mapping["mt5_ticket"]
+        if not pending_local:
+            logger.info("No pending local mappings to reconcile.")
+        else:
+            for mapping in pending_local:
+                ticket = mapping["mt5_ticket"]
 
-            if ticket in live_position_tickets:
-                logger.info(f"Reconcile: ticket {ticket} (limit_id={mapping['limit_id']}) -> FILLED")
-                local_db.mark_filled(ticket)
-                self.tp_engine.register_position(ticket, mapping)
+                if ticket in live_position_tickets:
+                    logger.info(f"Reconcile: ticket {ticket} (limit_id={mapping['limit_id']}) -> FILLED")
+                    local_db.mark_filled(ticket)
+                    self.tp_engine.register_position(ticket, mapping)
 
-            elif ticket not in live_order_tickets:
-                logger.info(f"Reconcile: ticket {ticket} (limit_id={mapping['limit_id']}) -> CANCELLED externally")
-                local_db.mark_cancelled(ticket)
+                elif ticket not in live_order_tickets:
+                    logger.info(
+                        f"Reconcile: ticket {ticket} (limit_id={mapping['limit_id']}) -> "
+                        f"CANCELLED externally — will be re-placed on next cycle if still pending in DB."
+                    )
+                    local_db.mark_cancelled(ticket)
 
-            else:
-                logger.debug(f"Reconcile: ticket {ticket} still pending — OK")
+                else:
+                    logger.debug(f"Reconcile: ticket {ticket} still pending — OK")
+
+        # ------------------------------------------------------------------
+        # Orphan sweep: cancel any MT5 pending orders with our MAGIC that
+        # have no local pending mapping.  This cleans up orders left over from
+        # a previous run where the local DB was cleared or never written.
+        # ------------------------------------------------------------------
+        local_pending_tickets = {m["mt5_ticket"] for m in pending_local}
+        orphan_tickets = live_order_tickets - local_pending_tickets
+        if orphan_tickets:
+            logger.warning(
+                f"Reconcile: found {len(orphan_tickets)} orphan MT5 order(s) "
+                f"with magic={MAGIC} not in local DB — cancelling."
+            )
+            for ticket in orphan_tickets:
+                logger.info(f"Reconcile: cancelling orphan ticket {ticket}")
+                mt5_api.cancel_pending_order(ticket)
 
         logger.info("Startup reconciliation complete.")
 
@@ -762,23 +795,27 @@ class SyncEngine:
                     in_range = True
 
                 if not in_range:
-                    threshold = self._get_proximity_threshold_pips(instrument)
-                    distance  = mt5_api.price_to_pips(
-                        abs(mt5_order_price - mt5_mid), symbol
-                    ) if prices else float("nan")
+                    threshold = self._get_proximity_threshold(instrument)
+                    use_dollars = self._proximity_uses_dollars(instrument)
+                    if prices:
+                        raw_dist = abs(mt5_order_price - mt5_mid)
+                        distance = raw_dist if use_dollars else mt5_api.price_to_pips(raw_dist, symbol)
+                    else:
+                        distance = float("nan")
+                    unit = "$" if use_dollars else "pips"
 
                     if limit_id not in deferred_limit_ids:
                         logger.info(
                             f"Limit {limit_id} ({instrument} @ {db_price:.5f}) is "
-                            f"{distance:.1f} pips away (threshold {threshold:.1f}) — "
+                            f"{distance:.2f} {unit} away (threshold {threshold:.2f} {unit}) — "
                             f"deferring until price comes within range."
                         )
                         local_db.upsert_deferred_limit(limit_id, signal["id"])
                         deferred_limit_ids.add(limit_id)
                     else:
                         logger.debug(
-                            f"Limit {limit_id} still deferred ({distance:.1f} pips, "
-                            f"threshold {threshold:.1f})."
+                            f"Limit {limit_id} still deferred ({distance:.2f} {unit}, "
+                            f"threshold {threshold:.2f} {unit})."
                         )
                     continue
 
@@ -883,6 +920,34 @@ class SyncEngine:
                         f"Signal {signal_id} gone from active — "
                         f"removed {removed} deferred limit(s)."
                     )
+
+        # ------------------------------------------------------------------
+        # MT5 orphan sweep
+        #
+        # Any pending MT5 order carrying our MAGIC number that has no
+        # corresponding local 'pending' mapping is an orphan.  This happens
+        # when:
+        #   • The bot was restarted and the local DB was cleared/reset.
+        #   • A previous bot instance placed orders that were never reconciled.
+        #   • An order was re-placed in MT5 externally for an inactive signal.
+        #
+        # We cancel these outright so the terminal stays in sync with what the
+        # DB actually says should be open.
+        # ------------------------------------------------------------------
+        # Re-fetch AFTER placements so tickets placed this cycle are included.
+        # Using the stale local_pending snapshot from the top of the function would
+        # make every freshly placed order look like an orphan and cancel it immediately.
+        current_local_pending_tickets = {m["mt5_ticket"] for m in local_db.get_pending_mappings()}
+        live_mt5_tickets = mt5_api.get_pending_order_tickets(MAGIC)
+        orphan_tickets = live_mt5_tickets - current_local_pending_tickets
+        if orphan_tickets:
+            logger.info(
+                f"MT5 orphan sweep: found {len(orphan_tickets)} order(s) with "
+                f"magic={MAGIC} not tracked locally — cancelling."
+            )
+            for ticket in orphan_tickets:
+                logger.info(f"Cancelling orphan MT5 order: ticket={ticket}")
+                mt5_api.cancel_pending_order(ticket)
 
 
     # ------------------------------------------------------------------

@@ -25,14 +25,14 @@
     "enabled": true,
     "default_pips": 500,
     "per_asset_class": {
-      "metals": 500,
+      "metals": 50,
       "forex": 200,
-      "indices": 1000,
-      "crypto": 2000,
-      "stocks": 300
+      "indices": 200,
+      "crypto": 500,
+      "stocks": 10
     },
     "per_instrument": {
-      "XAUUSD": 500
+      "XAUUSD": 50
     }
   },
   "execution": {

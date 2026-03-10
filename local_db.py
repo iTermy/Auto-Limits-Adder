@@ -129,24 +129,69 @@ def insert_order_mapping(
     db_path: str = DB_PATH,
 ) -> int:
     """
-    Insert a new pending order mapping.
-    Returns the new row id.
+    Insert a new pending order mapping, or update an existing cancelled/error row
+    for the same limit_id (re-placement after cancel+re-place cycles).
+
+    Returns the row id.
     """
-    sql = """
-        INSERT OR IGNORE INTO order_mappings
-            (limit_id, signal_id, mt5_ticket, order_type, lot_size, placed_at, status, db_stop_loss, is_scalp)
-        VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
-    """
+    now = _now_iso()
     with get_connection(db_path) as conn:
-        cur = conn.execute(sql, (limit_id, signal_id, mt5_ticket, order_type, lot_size, _now_iso(), db_stop_loss, int(is_scalp)))
-        conn.commit()
-        if cur.rowcount == 0:
-            # Duplicate — row already existed. Log and return existing id.
-            existing = conn.execute(
-                "SELECT id FROM order_mappings WHERE limit_id = ?", (limit_id,)
-            ).fetchone()
-            return existing["id"] if existing else -1
-        return cur.lastrowid
+        existing = conn.execute(
+            "SELECT id, status FROM order_mappings WHERE limit_id = ?", (limit_id,)
+        ).fetchone()
+
+        if existing is None:
+            cur = conn.execute(
+                """
+                INSERT INTO order_mappings
+                    (limit_id, signal_id, mt5_ticket, order_type, lot_size,
+                     placed_at, status, db_stop_loss, is_scalp,
+                     cancelled_at, filled_at,
+                     feed_price_at_placement, mt5_price_at_placement,
+                     offset_at_placement, last_offset_check, last_known_mt5_sl)
+                VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, NULL, NULL,
+                        NULL, NULL, NULL, NULL, NULL)
+                """,
+                (limit_id, signal_id, mt5_ticket, order_type, lot_size,
+                 now, db_stop_loss, int(is_scalp)),
+            )
+            conn.commit()
+            return cur.lastrowid
+
+        if existing["status"] in ("cancelled", "error"):
+            # Re-placement after a cancel — update the existing row so the
+            # UNIQUE constraint on limit_id does not block the new ticket.
+            conn.execute(
+                """
+                UPDATE order_mappings
+                SET mt5_ticket  = ?,
+                    order_type  = ?,
+                    lot_size    = ?,
+                    placed_at   = ?,
+                    status      = 'pending',
+                    db_stop_loss = ?,
+                    is_scalp    = ?,
+                    cancelled_at = NULL,
+                    filled_at   = NULL,
+                    feed_price_at_placement = NULL,
+                    mt5_price_at_placement  = NULL,
+                    offset_at_placement     = NULL,
+                    last_offset_check       = NULL,
+                    last_known_mt5_sl       = NULL
+                WHERE limit_id = ?
+                """,
+                (mt5_ticket, order_type, lot_size, now,
+                 db_stop_loss, int(is_scalp), limit_id),
+            )
+            conn.commit()
+            return existing["id"]
+
+        # Row exists and is pending or filled — unexpected duplicate.
+        logger.warning(
+            f"insert_order_mapping: limit_id={limit_id} already has a "
+            f"'{{existing['status']}}' mapping — skipping insert."
+        )
+        return existing["id"]
 
 
 # ---------------------------------------------------------------------------
@@ -198,10 +243,17 @@ def get_all_tracked_signal_ids(db_path: str = DB_PATH) -> set[int]:
 
 
 def get_all_tracked_limit_ids(db_path: str = DB_PATH) -> set[int]:
-    """Return all distinct limit_ids we have any mapping for (any status).
-    Used to prevent re-placing an order when the local DB write failed mid-cycle.
+    """Return limit_ids that have a PENDING or FILLED mapping.
+
+    Intentionally excludes 'cancelled' and 'error' rows so that a limit which
+    was externally cancelled (bulk-cancel in the terminal, news-mode pause, etc.)
+    but is still 'pending' in Supabase will be re-placed on the next cycle.
+
+    The only goal of this guard is to prevent double-placement within a single
+    cycle when the MT5 call succeeded but the local DB write hasn't committed yet.
+    A cancelled mapping is no longer "live", so it must not block re-placement.
     """
-    sql = "SELECT DISTINCT limit_id FROM order_mappings"
+    sql = "SELECT DISTINCT limit_id FROM order_mappings WHERE status IN ('pending', 'filled')"
     with get_connection(db_path) as conn:
         rows = conn.execute(sql).fetchall()
     return {r["limit_id"] for r in rows}
