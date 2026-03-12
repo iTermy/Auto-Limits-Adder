@@ -59,7 +59,7 @@ twice in a row has no additional effect.
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import db as supabase_db
@@ -72,16 +72,184 @@ logger = logging.getLogger(__name__)
 MAGIC = 20240001   # Unique magic number for all orders placed by this bot
 
 
+def _to_est(utc_dt: datetime) -> datetime:
+    """
+    Convert a UTC datetime to EST/EDT without requiring tzdata or zoneinfo.
+
+    EST = UTC-5, EDT = UTC-4.
+    EDT (daylight saving) is active from the second Sunday in March at 2:00 AM
+    local time through the first Sunday in November at 2:00 AM local time.
+    """
+    def _nth_sunday(year: int, month: int, n: int) -> int:
+        """Return the day-of-month of the nth Sunday (1-indexed) in month."""
+        first_weekday = datetime(year, month, 1).weekday()  # Mon=0 … Sun=6
+        first_sunday  = 1 + (6 - first_weekday) % 7
+        return first_sunday + (n - 1) * 7
+
+    year = utc_dt.year
+    # DST start: 2nd Sunday in March at 2:00 AM EST (= 7:00 AM UTC)
+    dst_start = datetime(year,  3, _nth_sunday(year,  3, 2), 7, 0, tzinfo=timezone.utc)
+    # DST end:   1st Sunday in November at 2:00 AM EDT (= 6:00 AM UTC)
+    dst_end   = datetime(year, 11, _nth_sunday(year, 11, 1), 6, 0, tzinfo=timezone.utc)
+
+    offset = timedelta(hours=-4) if dst_start <= utc_dt < dst_end else timedelta(hours=-5)
+    return utc_dt + offset
+
+
 # ---------------------------------------------------------------------------
-# Bot mode monitor — news_mode / spread_hour
+# Market hours monitor — local spread hour + weekend detection
+# ---------------------------------------------------------------------------
+
+class MarketHoursMonitor:
+    """
+    Detects spread hour (4:45–6:00 PM EST, Mon–Fri) and the weekend window
+    (Friday 4:45 PM → Sunday 6:00 PM EST) purely from local system time.
+    No database polling required.
+
+    State transitions:
+        closed → open  : delete the 'cancelled' rows for paused limits so the
+                         sync engine re-places them on the next cycle.
+        open → closed  : cancel all pending MT5 orders and record the limit_ids
+                         so they can be restored when markets reopen.
+
+    Weekend vs daily spread hour are treated identically at the mechanics level —
+    the difference is only in when the window starts/ends.
+    """
+
+    def __init__(self) -> None:
+        # None = not yet evaluated; True = market closed; False = market open
+        self._market_closed: Optional[bool] = None
+        self._paused_limit_ids: set[int] = set()
+
+    @staticmethod
+    def _is_market_closed(now: datetime) -> bool:
+        """
+        Return True when MT5/ICMarkets is closed and pending orders should not
+        exist.  Covers two windows (all times EST/EDT):
+
+          • Daily spread hour  Mon–Thu  4:45 PM → 6:00 PM
+          • Weekend            Fri 4:45 PM → Sun 6:00 PM
+        """
+        est     = _to_est(now)
+        weekday = est.weekday()   # Mon=0 … Sun=6
+        hm      = (est.hour, est.minute)
+
+        # Saturday: always closed
+        if weekday == 5:
+            return True
+        # Sunday: closed until 6:00 PM
+        if weekday == 6:
+            return hm < (18, 0)
+        # Friday: closed from 4:45 PM (into the weekend)
+        if weekday == 4:
+            return hm >= (16, 45)
+        # Mon–Thu: daily spread hour 4:45–6:00 PM
+        return (16, 45) <= hm < (18, 0)
+
+    @property
+    def is_paused(self) -> bool:
+        """True while the market is in a closed window."""
+        return bool(self._market_closed)
+
+    def check(self) -> None:
+        """
+        Evaluate current time and fire cancel/restore if the market state has
+        changed.  Call once per run_cycle(), *before* _sync_orders().
+        """
+        now    = datetime.now(timezone.utc)
+        closed = self._is_market_closed(now)
+        prev   = self._market_closed
+
+        if prev is None:
+            # First call — record state but don't act yet; avoid a spurious
+            # cancel on startup if we happen to be in a closed window.
+            # The transition will fire cleanly on the next cycle.
+            self._market_closed = closed
+            if closed:
+                est_str = _to_est(now).strftime("%I:%M %p EST")
+                logger.info(
+                    f"MarketHoursMonitor: startup inside closed window ({est_str}) "
+                    f"— will cancel pending orders on next cycle."
+                )
+            return
+
+        if prev == closed:
+            return   # No state change
+
+        self._market_closed = closed
+        est_str = _to_est(now).strftime("%I:%M %p EST")
+
+        if closed:
+            logger.warning(
+                f"⏰  Market closed window started ({est_str}) — "
+                f"cancelling all pending orders."
+            )
+            self._cancel_all_pending()
+        else:
+            logger.info(
+                f"✅  Market reopened ({est_str}) — "
+                f"restoring paused limits for re-placement."
+            )
+            self._restore_paused_limits()
+
+    def _cancel_all_pending(self) -> None:
+        """Cancel every pending MT5 order and record the limit_ids."""
+        pending = local_db.get_pending_mappings()
+        if not pending:
+            logger.info("Market hours: no pending orders to cancel.")
+            return
+
+        cancelled_count = 0
+        for mapping in pending:
+            ticket   = mapping["mt5_ticket"]
+            limit_id = mapping["limit_id"]
+            success  = mt5_api.cancel_pending_order(ticket)
+            if success:
+                local_db.mark_cancelled(ticket)
+                self._paused_limit_ids.add(limit_id)
+                cancelled_count += 1
+            else:
+                logger.warning(
+                    f"Market hours: could not cancel ticket {ticket} "
+                    f"(limit_id={limit_id}) — may have filled."
+                )
+
+        logger.info(
+            f"Market hours: cancelled {cancelled_count}/{len(pending)} pending order(s)."
+        )
+
+    def _restore_paused_limits(self) -> None:
+        """
+        Delete the 'cancelled' local rows for paused limits so the sync engine
+        re-places them on the next cycle.  Limits whose parent signal is no
+        longer active/hit are simply dropped — the sync engine won't re-place
+        them because they won't appear in the next DB fetch.
+        """
+        if not self._paused_limit_ids:
+            logger.info("Market hours: no paused limits to restore.")
+            return
+
+        limit_ids = list(self._paused_limit_ids)
+        deleted   = local_db.delete_cancelled_for_limit_ids(limit_ids)
+        logger.info(
+            f"Market hours: purged {deleted} cancelled row(s) for "
+            f"{len(limit_ids)} limit(s) — orders will be re-placed next cycle."
+        )
+        self._paused_limit_ids.clear()
+
+
+# ---------------------------------------------------------------------------
+# Bot mode monitor — news_mode / spread_hour (DB-driven, news only now)
 # ---------------------------------------------------------------------------
 
 class BotModeMonitor:
     """
     Polls the bot_mode_status table every cycle and fires cancel/restore
-    actions when news_mode or spread_hour transitions between states.
+    actions when news_mode transitions.  Spread hour is now handled entirely
+    by MarketHoursMonitor based on local time — the spread_hour DB flag is
+    intentionally ignored here.
 
-    State machine per flag:
+    State machine:
         False → True  : cancel all pending MT5 orders + mark them cancelled
                          locally; record the limit_ids so they can be restored.
         True  → False : delete those cancelled local rows so the sync engine's
@@ -93,56 +261,43 @@ class BotModeMonitor:
     """
 
     def __init__(self) -> None:
-        # Last known state of each flag (None = not yet polled)
-        self._news_mode:   Optional[bool] = None
-        self._spread_hour: Optional[bool] = None
+        # Last known state of news_mode flag (None = not yet polled)
+        self._news_mode: Optional[bool] = None
 
-        # limit_ids cancelled due to an active mode pause.
+        # limit_ids cancelled due to an active news pause.
         # Stored so we can purge those cancelled rows when the pause ends.
         self._paused_limit_ids: set[int] = set()
 
     @property
     def is_paused(self) -> bool:
-        """True while any mode flag is active."""
-        return bool(self._news_mode or self._spread_hour)
+        """True while news mode is active."""
+        return bool(self._news_mode)
 
     async def check(self, pool) -> None:
         """
-        Fetch the latest bot_mode_status row and react to any flag transitions.
+        Fetch the latest bot_mode_status row and react to news_mode transitions.
         Call once per run_cycle(), *before* _sync_orders().
         """
         row = await supabase_db.fetch_bot_mode_status(pool)
         if row is None:
-            # Table empty or unreachable — treat as both flags off.
-            new_news   = False
-            new_spread = False
+            new_news = False
         else:
-            new_news   = bool(row.get("news_mode",   False))
-            new_spread = bool(row.get("spread_hour", False))
+            new_news = bool(row.get("news_mode", False))
 
         prev_paused = self.is_paused
 
-        # Detect individual flag changes for logging clarity
         if self._news_mode != new_news:
             if new_news:
                 logger.warning("⚠️  NEWS MODE activated — cancelling all pending orders.")
             else:
                 logger.info("✅  News mode cleared.")
-        if self._spread_hour != new_spread:
-            if new_spread:
-                logger.warning("⚠️  SPREAD HOUR activated — cancelling all pending orders.")
-            else:
-                logger.info("✅  Spread hour cleared.")
 
-        self._news_mode   = new_news
-        self._spread_hour = new_spread
+        self._news_mode = new_news
         now_paused = self.is_paused
 
         if not prev_paused and now_paused:
-            # Transition INTO a paused state — cancel everything pending
             self._cancel_all_pending()
         elif prev_paused and not now_paused:
-            # Transition OUT of pause — purge cancelled rows so orders re-place
             self._restore_paused_limits()
 
     def _cancel_all_pending(self) -> None:
@@ -446,9 +601,23 @@ async def get_feed_offset(
 
     Queries live_prices using the DB instrument name (uppercased), which is
     how the alert bot writes it. Returns None if data is stale or unavailable.
+
+    MT5 price is snapshotted BEFORE the async DB fetch so both prices are
+    sampled as close together in time as possible. The DB fetch is a network
+    roundtrip (50-200ms) during which the MT5 price would otherwise drift,
+    making the offset inaccurate. By capturing MT5 first, the offset always
+    reflects the MT5 price at the same moment the DB query is issued.
     """
     feed_symbol = get_live_prices_key(instrument)
 
+    # Snapshot MT5 price FIRST (synchronous, sub-ms) before the async DB call.
+    mt5_prices = mt5_api.get_current_price(mt5_symbol)
+    if mt5_prices is None:
+        logger.warning(f"Cannot get MT5 price for '{mt5_symbol}'.")
+        return None
+    mt5_mid = (mt5_prices[0] + mt5_prices[1]) / 2.0
+
+    # Now fetch the feed price. The MT5 snapshot above is already locked in.
     live_row = await supabase_db.fetch_live_price(pool, feed_symbol)
     if live_row is None:
         logger.warning(f"No live_prices row for feed symbol '{feed_symbol}'.")
@@ -463,18 +632,12 @@ async def get_feed_offset(
         return None
 
     feed_mid = (live_row["bid"] + live_row["ask"]) / 2.0
-
-    mt5_prices = mt5_api.get_current_price(mt5_symbol)
-    if mt5_prices is None:
-        logger.warning(f"Cannot get MT5 price for '{mt5_symbol}'.")
-        return None
-
-    mt5_mid = (mt5_prices[0] + mt5_prices[1]) / 2.0
-    offset  = mt5_mid - feed_mid
+    feed_age = (datetime.now(timezone.utc) - live_row["updated_at"]).total_seconds()
+    offset   = mt5_mid - feed_mid
 
     logger.debug(
         f"Offset {instrument}: mt5={mt5_mid:.5f}, feed={feed_mid:.5f}, "
-        f"offset={offset:+.5f}"
+        f"offset={offset:+.5f} (feed data {feed_age:.0f}s old)"
     )
     return offset
 
@@ -526,6 +689,10 @@ class SyncEngine:
 
         # Bot mode monitor — pauses order placement during news / spread hour
         self._mode_monitor = BotModeMonitor()
+
+        # Market hours monitor — cancels pending orders during spread hour
+        # and over the weekend based on local EST time (no DB polling needed).
+        self._market_hours_monitor = MarketHoursMonitor()
 
         # Forced exit monitor — closes open positions on manual cancel/breakeven
         self._forced_exit_monitor = ForcedExitMonitor()
@@ -632,14 +799,18 @@ class SyncEngine:
                 self.tp_engine.run_tick()
                 return
 
-            # Check bot mode flags first — cancels pending orders if a news/spread
-            # pause just started, restores them (by clearing cancelled rows) if it ended.
+            # Market hours check (local time) — cancels pending orders during
+            # spread hour (4:45–6:00 PM EST) and the weekend (Fri 4:45 PM –
+            # Sun 6:00 PM EST).  Runs before the DB-driven news mode check.
+            self._market_hours_monitor.check()
+
+            # News mode check (DB-driven).
             await self._mode_monitor.check(self.pool)
 
-            # Skip order sync and readjustment while any mode flag is active.
+            # Skip order sync and readjustment while any pause is active.
             # Fill detection, forced exits, and TP always run so open positions
             # are still managed correctly.
-            if self._mode_monitor.is_paused:
+            if self._market_hours_monitor.is_paused or self._mode_monitor.is_paused:
                 await self._detect_fills()
                 await self._forced_exit_monitor.check(self.pool, self.tp_engine)
                 self.tp_engine.run_tick()
