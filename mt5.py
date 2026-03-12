@@ -54,7 +54,7 @@ def _find_mt5_terminal() -> Optional[str]:
                     continue
                 candidate = os.path.join(entry.path, "terminal64.exe")
                 if os.path.isfile(candidate):
-                    logger.info(f"Found MT5 terminal at: {candidate}")
+                    logger.debug(f"Found MT5 terminal at: {candidate}")
                     return candidate
         except PermissionError:
             continue
@@ -354,7 +354,7 @@ def place_pending_order(
         )
         return None
 
-    logger.info(
+    logger.debug(
         f"Placed {order_type_to_str(order_type)} order: ticket={result.order}, "
         f"symbol={symbol}, lot={lot_size}, price={price}, sl={sl}"
     )
@@ -387,7 +387,7 @@ def cancel_pending_order(ticket: int) -> bool:
         )
         return False
 
-    logger.info(f"Cancelled pending order ticket={ticket}")
+    logger.debug(f"Cancelled pending order ticket={ticket}")
     return True
 
 
@@ -507,7 +507,7 @@ def close_position(ticket: int, lot_size: float, symbol: str, comment: str = "")
         logger.error(f"Close position failed: ticket={ticket}, retcode={retcode}")
         return False
 
-    logger.info(f"Closed {lot_size} lots of position ticket={ticket} ({symbol})")
+    logger.debug(f"Closed {lot_size} lots of position ticket={ticket} ({symbol})")
     return True
 
 
@@ -549,7 +549,7 @@ def modify_position_sl(ticket: int, new_sl: float, symbol: str) -> bool:
         )
         return False
 
-    logger.info(
+    logger.debug(
         f"Updated SL on position ticket={ticket} ({symbol}): "
         f"{pos.sl:.5f} → {rounded_sl:.5f}"
     )

@@ -283,13 +283,23 @@ class DefaultTPStrategy(BaseTPStrategy):
 
     def _trigger_conditions_met(self, position: dict, context: TPContext) -> bool:
         """
-        Returns True if:
-          1. The most-recently-hit sibling has moved >= profit_threshold in profit.
-          2. All other open positions for this signal are at or above entry (breakeven).
+        Returns True if BOTH conditions are met simultaneously:
+          1. The most-recently-hit position is >= profit_threshold in profit.
+          2. The COMBINED P&L of all other positions is >= 0 (breakeven in aggregate).
+
+        Mirrors the server bot (tp_monitor.py) logic exactly:
+          - Condition 1 must clear first — if the last limit hasn't hit its
+            threshold yet, we never TP regardless of the other positions.
+          - Condition 2 uses a combined sum, not a per-position check, so one
+            earlier position being slightly underwater is acceptable as long as
+            the others compensate.
 
         profit_threshold is compared in dollars if context.profit_threshold_dollars,
-        otherwise in pips. Breakeven check is always in the same unit.
+        otherwise in pips. The breakeven sum uses raw price-move units (same as
+        the server bot's dollar-based calculate_pnl for non-forex instruments).
         """
+        EPSILON = 1e-9
+
         siblings = context.sibling_positions
         if not siblings:
             return False
@@ -299,20 +309,23 @@ class DefaultTPStrategy(BaseTPStrategy):
         if profit_pos is None:
             return False
 
-        # Check profit position has hit threshold
+        # Condition 1: last-hit position must have cleared the profit threshold.
+        # If this hasn't happened yet there's nothing more to check.
         if context.profit_threshold_dollars:
-            if self._price_move(profit_pos, context) < context.profit_threshold:
+            if self._price_move(profit_pos, context) < context.profit_threshold - EPSILON:
                 return False
         else:
             profit_pips = mt5_api.price_to_pips(self._price_move(profit_pos, context), context.symbol)
-            if profit_pips < context.profit_threshold:
+            if profit_pips < context.profit_threshold - EPSILON:
                 return False
 
-        # Check all other positions are at breakeven (>= entry)
-        for pos in siblings:
-            if pos["ticket"] == profit_ticket:
-                continue
-            if self._price_move(pos, context) < 0:
+        # Condition 2: combined P&L of all OTHER positions must be >= 0.
+        # A single underwater position is fine as long as the aggregate is
+        # non-negative — matches the server bot's combined_earlier_pnl check.
+        earlier_positions = [p for p in siblings if p["ticket"] != profit_ticket]
+        if earlier_positions:
+            combined_pnl = sum(self._price_move(p, context) for p in earlier_positions)
+            if combined_pnl < -EPSILON:
                 return False
 
         return True
@@ -771,9 +784,7 @@ class TPEngine:
         )
 
         success = await supabase_db.insert_tp_outcome(self.pool, row)
-        if success:
-            logger.debug(f"tp_outcomes: recorded {outcome_type} for ticket={ticket} ({symbol})")
-        else:
+        if not success:
             logger.warning(f"tp_outcomes: failed to record {outcome_type} for ticket={ticket}")
 
     # ------------------------------------------------------------------

@@ -99,7 +99,7 @@ def init_db(db_path: str = DB_PATH) -> None:
             except sqlite3.OperationalError:
                 pass  # Column already exists — safe to ignore
         conn.commit()
-    logger.info(f"Local SQLite DB initialised at '{db_path}'.")
+    logger.debug(f"Local SQLite DB initialised at '{db_path}'.")
 
 
 # ---------------------------------------------------------------------------

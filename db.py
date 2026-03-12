@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # This role has SELECT-only access on: signals, limits, live_prices, licenses, bot_mode_status.
 # It cannot INSERT, UPDATE, DELETE, or access any other table.
 # Rotate this password via Supabase dashboard → Database → Roles if compromised.
-_RO_DSN = "postgresql://execution_bot_ro.cqogevbfbrfzgbuxbhmn:oS%2495chu86HanS@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
+_RO_DSN = ""
 
 
 # ---------------------------------------------------------------------------
@@ -35,13 +35,13 @@ async def create_pool() -> asyncpg.Pool:
         max_size=5,
         server_settings={"search_path": "public"},
     )
-    logger.info("Supabase connection pool created.")
+    logger.debug("Supabase connection pool created.")
     return pool
 
 
 async def close_pool(pool: asyncpg.Pool) -> None:
     await pool.close()
-    logger.info("Supabase connection pool closed.")
+    logger.debug("Supabase connection pool closed.")
 
 
 # ---------------------------------------------------------------------------

@@ -196,7 +196,7 @@ class MarketHoursMonitor:
         """Cancel every pending MT5 order and record the limit_ids."""
         pending = local_db.get_pending_mappings()
         if not pending:
-            logger.info("Market hours: no pending orders to cancel.")
+            logger.debug("Market hours: no pending orders to cancel.")
             return
 
         cancelled_count = 0
@@ -226,7 +226,7 @@ class MarketHoursMonitor:
         them because they won't appear in the next DB fetch.
         """
         if not self._paused_limit_ids:
-            logger.info("Market hours: no paused limits to restore.")
+            logger.debug("Market hours: no paused limits to restore.")
             return
 
         limit_ids = list(self._paused_limit_ids)
@@ -304,7 +304,7 @@ class BotModeMonitor:
         """Cancel every pending MT5 order and record the limit_ids affected."""
         pending = local_db.get_pending_mappings()
         if not pending:
-            logger.info("Bot mode pause: no pending orders to cancel.")
+            logger.debug("Bot mode pause: no pending orders to cancel.")
             return
 
         cancelled_count = 0
@@ -335,7 +335,7 @@ class BotModeMonitor:
         and re-place them on the next cycle.
         """
         if not self._paused_limit_ids:
-            logger.info("Bot mode cleared: no paused limits to restore.")
+            logger.debug("Bot mode cleared: no paused limits to restore.")
             return
 
         limit_ids = list(self._paused_limit_ids)
@@ -841,7 +841,7 @@ class SyncEngine:
         live_position_tickets = mt5_api.get_open_position_tickets(MAGIC)
 
         if not pending_local:
-            logger.info("No pending local mappings to reconcile.")
+            logger.debug("No pending local mappings to reconcile.")
         else:
             for mapping in pending_local:
                 ticket = mapping["mt5_ticket"]
@@ -1549,7 +1549,7 @@ class SyncEngine:
         if use_offset and feed_mid is not None and mt5_mid is not None:
             local_db.update_offset_metadata(ticket, feed_mid, mt5_mid)
 
-        logger.info(
+        logger.debug(
             f"Placed {mt5_api.order_type_to_str(order_type)}: "
             f"ticket={ticket}, symbol={symbol}, lot={lot_size}, "
             f"price={mt5_order_price:.5f} (db={db_price:.5f}, offset={offset:+.5f}, "

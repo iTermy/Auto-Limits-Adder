@@ -68,7 +68,7 @@ def load_config(path: str = "config.json") -> dict:
         return _load()  # config.py auto-creates and returns defaults
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
-    logger.info(f"Config loaded from '{config_path}'.")
+    logger.debug(f"Config loaded from '{config_path}'.")
     return config
 
 
