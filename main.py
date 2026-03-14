@@ -14,12 +14,23 @@ Requirements:
     - config.json in the same directory
 """
 
+import subprocess
+import sys
+
+# Auto-install required packages before anything else imports them
+_REQUIRED = ["asyncpg", "MetaTrader5"]
+for _pkg in _REQUIRED:
+    try:
+        __import__(_pkg.lower().replace("-", "_"))
+    except ImportError:
+        print(f"Installing {_pkg}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", _pkg, "--quiet"])
+
 import asyncio
 import json
 import logging
 import os
 import signal
-import sys
 from pathlib import Path
 
 

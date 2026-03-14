@@ -39,16 +39,16 @@ def default_config() -> dict:
         },
         "proximity_filter": {
             "enabled": True,
-            "default_pips": 500,
+            "default_pips": 50,
             "per_asset_class": {
-                "metals": 500,
-                "forex": 200,
-                "indices": 1000,
+                "metals": 30,
+                "forex": 40,
+                "indices": 100,
                 "crypto": 2000,
-                "stocks": 300
+                "stocks": 10
             },
             "per_instrument": {
-                "XAUUSD": 500
+                "XAUUSD": 30
             }
         },
         "execution": {
