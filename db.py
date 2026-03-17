@@ -172,7 +172,8 @@ async def fetch_limit_by_id(pool: asyncpg.Pool, limit_id: int) -> Optional[dict]
     query = """
         SELECT l.id, l.signal_id, l.price_level, l.sequence_number, l.status,
                l.hit_time, l.hit_price, l.created_at,
-               s.direction, s.stop_loss, s.instrument, s.total_limits, s.status AS signal_status
+               s.direction, s.stop_loss, s.instrument, s.total_limits,
+               s.status AS signal_status, s.scalp
         FROM limits l
         JOIN signals s ON s.id = l.signal_id
         WHERE l.id = $1

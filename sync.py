@@ -1270,12 +1270,17 @@ class SyncEngine:
             db_price   = lim_row["price_level"]
             num_limits = lim_row.get("total_limits", 1) or 1
 
-            # --- Compute avg SL distance across sibling pending limits ---
-            sibling_limits = await supabase_db.fetch_pending_limits_for_signal(
+            # --- Compute avg SL distance across ALL limits for this signal ---
+            # We intentionally use fetch_all_limits_for_signal (not the pending-only
+            # variant) so that already-filled siblings are still included in the
+            # average.  If we only counted pending limits, a filled sibling would
+            # reduce the average while num_limits (total_limits) stayed the same,
+            # producing an inflated lot size and a spurious cancel+re-place.
+            all_sibling_limits = await supabase_db.fetch_all_limits_for_signal(
                 self.pool, lim_row["signal_id"]
             )
-            if sibling_limits:
-                distances = [abs(l["price_level"] - db_sl) for l in sibling_limits]
+            if all_sibling_limits:
+                distances = [abs(l["price_level"] - db_sl) for l in all_sibling_limits]
                 avg_sl_distance = sum(distances) / len(distances)
             else:
                 avg_sl_distance = abs(db_price - db_sl)
@@ -1347,6 +1352,7 @@ class SyncEngine:
                 "direction":    direction,
                 "stop_loss":    db_sl,
                 "total_limits": num_limits,
+                "scalp":        lim_row.get("scalp", False),
             }
             lim_stub = {
                 "id":          lim_row["id"],
@@ -1636,15 +1642,16 @@ class SyncEngine:
             local_db.mark_cancelled(mapping["mt5_ticket"])
 
             # Reconstruct minimal dicts to re-use _place_order_for_limit.
-            # Re-compute the average SL distance across all currently-pending
-            # limits of this signal so the re-placed order keeps the same
-            # equal lot sizing as the original batch.
+            # Re-compute the average SL distance across ALL limits of this signal
+            # (not just pending ones) so that a filled sibling does not shrink the
+            # average and inflate the lot size on the remaining pending order.
             signal_stub = {
                 "id":           lim_row["signal_id"],
                 "instrument":   lim_row["instrument"],
                 "direction":    lim_row["direction"],
                 "stop_loss":    lim_row["stop_loss"],
                 "total_limits": lim_row.get("total_limits", 1),
+                "scalp":        lim_row.get("scalp", False),
             }
             lim_stub = {
                 "id":          lim_row["id"],
@@ -1652,13 +1659,14 @@ class SyncEngine:
                 "price_level": lim_row["price_level"],
             }
 
-            # Fetch sibling pending limits to recompute average SL distance.
-            sibling_limits = await supabase_db.fetch_pending_limits_for_signal(
+            # Use fetch_all_limits_for_signal so filled siblings are still included
+            # in the average — prevents lot-size inflation when one limit has filled.
+            all_sibling_limits = await supabase_db.fetch_all_limits_for_signal(
                 self.pool, lim_row["signal_id"]
             )
             db_sl = lim_row["stop_loss"]
-            if sibling_limits:
-                distances = [abs(l["price_level"] - db_sl) for l in sibling_limits]
+            if all_sibling_limits:
+                distances = [abs(l["price_level"] - db_sl) for l in all_sibling_limits]
                 avg_sl_distance = sum(distances) / len(distances)
             else:
                 avg_sl_distance = abs(lim_row["price_level"] - db_sl)
