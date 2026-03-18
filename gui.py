@@ -1027,7 +1027,7 @@ class SettingsWindow(tk.Tk):
     def _save(self):
         cfg = self._cfg
 
-        cfg["poll_interval_seconds"] = 5
+        cfg["poll_interval_seconds"] = 2
         cfg.setdefault("license", {})["key"] = self._license_entry.get().strip()
 
         included_ac = [cls for cls, var in self._ac_vars.items() if var.get()]

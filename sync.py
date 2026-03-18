@@ -1159,6 +1159,16 @@ class SyncEngine:
             if signal is None:
                 continue
 
+            # Do NOT touch the SL on positions that are currently being
+            # trailed by the TP engine.  set_trailing_stop() owns the SL
+            # from the moment the partial close fires; overwriting it here
+            # would reset the trailing stop back to the original DB SL price
+            # every cycle, completely defeating the trail.
+            strategy = getattr(self.tp_engine, "strategy", None)
+            trailing_tickets = getattr(strategy, "_trailing", {})
+            if ticket in trailing_tickets:
+                continue
+
             instrument = signal["instrument"]
             symbol     = map_instrument_to_symbol(instrument, self.symbol_map)
             direction  = signal["direction"]

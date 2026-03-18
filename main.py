@@ -107,7 +107,7 @@ async def main() -> None:
 
     # Load config
     config = load_config()
-    poll_interval = config.get("poll_interval_seconds", 5)
+    poll_interval = config.get("poll_interval_seconds", 2)
 
     # Initialise local SQLite DB
     local_db.init_db()

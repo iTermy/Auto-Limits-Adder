@@ -1,5 +1,5 @@
 {
-  "poll_interval_seconds": 5,
+  "poll_interval_seconds": 1,
   "filters": {
     "instruments": {
       "mode": "exclude",
@@ -23,13 +23,13 @@
   },
   "proximity_filter": {
     "enabled": true,
-    "default_pips": 500,
+    "default_pips": 50,
     "per_asset_class": {
       "metals": 50,
-      "forex": 200,
-      "indices": 200,
-      "crypto": 500,
-      "stocks": 10
+      "forex": 30,
+      "indices": 50,
+      "crypto": 2000,
+      "stocks": 5
     },
     "per_instrument": {
       "XAUUSD": 50
