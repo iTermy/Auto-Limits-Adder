@@ -835,47 +835,131 @@ class SyncEngine:
     async def reconcile_on_startup(self) -> None:
         logger.info("Running startup reconciliation...")
 
-        pending_local = local_db.get_pending_mappings()
-
+        # ------------------------------------------------------------------
+        # Step 1: Cancel every pending MT5 order placed by this bot.
+        #
+        # On startup we always wipe the slate clean so stale pending orders
+        # from previous sessions don't linger in MT5.  The sync cycle will
+        # re-place whichever orders are still valid on its first run.
+        #
+        # Open positions (filled limits) are intentionally left untouched —
+        # the TP engine picks them up in step 3 below.
+        # ------------------------------------------------------------------
         live_order_tickets    = mt5_api.get_pending_order_tickets(MAGIC)
         live_position_tickets = mt5_api.get_open_position_tickets(MAGIC)
 
-        if not pending_local:
-            logger.debug("No pending local mappings to reconcile.")
-        else:
-            for mapping in pending_local:
-                ticket = mapping["mt5_ticket"]
+        cancelled_count = 0
+        for ticket in live_order_tickets:
+            ok = mt5_api.cancel_pending_order(ticket)
+            if ok:
+                cancelled_count += 1
+            else:
+                logger.warning(f"Reconcile: could not cancel pending order {ticket} at startup.")
 
-                if ticket in live_position_tickets:
-                    logger.info(f"Reconcile: ticket {ticket} (limit_id={mapping['limit_id']}) -> FILLED")
-                    local_db.mark_filled(ticket)
-                    self.tp_engine.register_position(ticket, mapping)
-
-                elif ticket not in live_order_tickets:
-                    logger.info(
-                        f"Reconcile: ticket {ticket} (limit_id={mapping['limit_id']}) -> "
-                        f"CANCELLED externally — will be re-placed on next cycle if still pending in DB."
-                    )
-                    local_db.mark_cancelled(ticket)
-
-                else:
-                    logger.debug(f"Reconcile: ticket {ticket} still pending — OK")
-
-        # ------------------------------------------------------------------
-        # Orphan sweep: cancel any MT5 pending orders with our MAGIC that
-        # have no local pending mapping.  This cleans up orders left over from
-        # a previous run where the local DB was cleared or never written.
-        # ------------------------------------------------------------------
-        local_pending_tickets = {m["mt5_ticket"] for m in pending_local}
-        orphan_tickets = live_order_tickets - local_pending_tickets
-        if orphan_tickets:
-            logger.warning(
-                f"Reconcile: found {len(orphan_tickets)} orphan MT5 order(s) "
-                f"with magic={MAGIC} not in local DB — cancelling."
+        if live_order_tickets:
+            logger.info(
+                f"Reconcile: cancelled {cancelled_count}/{len(live_order_tickets)} "
+                f"pending MT5 order(s) at startup."
             )
-            for ticket in orphan_tickets:
-                logger.info(f"Reconcile: cancelling orphan ticket {ticket}")
-                mt5_api.cancel_pending_order(ticket)
+
+        # ------------------------------------------------------------------
+        # Step 2: Wipe all pending/cancelled/deferred rows from orders.db.
+        #
+        # This ensures the sync engine's diff sees every active DB limit as
+        # "untracked" and re-places it fresh, with current lot sizes and
+        # spread — no stale state carries over from the previous session.
+        # ------------------------------------------------------------------
+        orders_purged, deferred_purged = local_db.purge_all_pending_on_startup()
+        if orders_purged or deferred_purged:
+            logger.info(
+                f"Reconcile: purged {orders_purged} pending order mapping(s) "
+                f"and {deferred_purged} deferred limit(s) from local DB."
+            )
+
+        # ------------------------------------------------------------------
+        # Step 3: Open-position recovery.
+        #
+        # Find any MT5 positions with our MAGIC that are not tracked in
+        # orders.db as 'filled'.  This happens when orders.db is reset while
+        # positions remain open from the previous session.
+        #
+        # For each such position, try to match it to an active/hit signal
+        # (by symbol + direction) and create a synthetic mapping so the TP
+        # engine can manage it correctly.  If no match is found, log a
+        # warning and leave it open for manual management.
+        # ------------------------------------------------------------------
+        filled_local_tickets = {
+            m["mt5_ticket"] for m in local_db.get_filled_mappings_by_signal_ids(
+                list(local_db.get_signal_ids_with_filled_positions())
+            )
+        } if local_db.get_signal_ids_with_filled_positions() else set()
+
+        live_positions = mt5_api.get_open_positions(MAGIC)
+        untracked_positions = [
+            p for p in live_positions if p["ticket"] not in filled_local_tickets
+        ]
+
+        if untracked_positions:
+            logger.warning(
+                f"Reconcile: found {len(untracked_positions)} open position(s) with "
+                f"magic={MAGIC} not tracked in local DB — attempting recovery."
+            )
+            try:
+                active_signals = await supabase_db.fetch_active_signals(self.pool)
+            except Exception as exc:
+                logger.warning(f"Reconcile: could not fetch signals for open-position recovery: {exc}")
+                active_signals = []
+
+            symbol_map = self.symbol_map
+            for pos in untracked_positions:
+                ticket     = pos["ticket"]
+                mt5_symbol = pos["symbol"]
+                pos_type   = pos["type"]  # 0=buy, 1=sell
+                direction  = "long" if pos_type == 0 else "short"
+
+                matched_signal = None
+                for sig in active_signals:
+                    mapped = map_instrument_to_symbol(sig["instrument"], symbol_map)
+                    if mapped.upper() == mt5_symbol.upper() and sig["direction"] == direction:
+                        matched_signal = sig
+                        break
+
+                if matched_signal is None:
+                    logger.warning(
+                        f"Reconcile: open position ticket={ticket} ({mt5_symbol} {direction}) "
+                        f"has no matching active signal — leaving open, manage manually."
+                    )
+                    continue
+
+                signal_id  = matched_signal["id"]
+                db_sl      = matched_signal["stop_loss"]
+                is_scalp   = bool(matched_signal.get("scalp", False))
+                order_type = "buy_limit" if direction == "long" else "sell_limit"
+
+                synthetic_limit_id = -(ticket)
+
+                logger.info(
+                    f"Reconcile: recovering open position ticket={ticket} "
+                    f"({mt5_symbol}) → signal_id={signal_id} (synthetic limit_id={synthetic_limit_id})"
+                )
+                local_db.insert_order_mapping(
+                    limit_id     = synthetic_limit_id,
+                    signal_id    = signal_id,
+                    mt5_ticket   = ticket,
+                    order_type   = order_type,
+                    lot_size     = pos["volume"],
+                    db_stop_loss = db_sl,
+                    is_scalp     = is_scalp,
+                )
+                local_db.mark_filled(ticket)
+
+                synthetic_mapping = {
+                    "limit_id":  synthetic_limit_id,
+                    "signal_id": signal_id,
+                    "lot_size":  pos["volume"],
+                    "is_scalp":  is_scalp,
+                }
+                self.tp_engine.register_position(ticket, synthetic_mapping)
 
         logger.info("Startup reconciliation complete.")
 
@@ -1012,8 +1096,26 @@ class SyncEngine:
             if limit_id not in db_pending:
                 ticket = mapping["mt5_ticket"]
                 logger.info(f"Limit {limit_id} no longer pending in DB — cancelling ticket {ticket}")
-                mt5_api.cancel_pending_order(ticket)
-                local_db.mark_cancelled(ticket)
+                cancel_ok = mt5_api.cancel_pending_order(ticket)
+                if cancel_ok:
+                    local_db.mark_cancelled(ticket)
+                else:
+                    # Cancel failed — the order may have just filled concurrently
+                    # (the server bot hit the limit and MT5 processed the fill before
+                    # our cancel arrived).  Check if the ticket is now an open position;
+                    # if so, register it with the TP engine instead of marking it cancelled.
+                    live_position_tickets = mt5_api.get_open_position_tickets(MAGIC)
+                    if ticket in live_position_tickets:
+                        logger.info(
+                            f"Limit {limit_id} cancel failed but ticket={ticket} "
+                            f"is now an open position — treating as fill."
+                        )
+                        local_db.mark_filled(ticket)
+                        self.tp_engine.register_position(ticket, mapping)
+                    else:
+                        # Order is gone from both pending and positions — already
+                        # cancelled externally or filled and closed very quickly.
+                        local_db.mark_cancelled(ticket)
 
         # ------------------------------------------------------------------
         # Cancel + re-place pending orders whose stop_loss has changed in DB
@@ -1134,12 +1236,13 @@ class SyncEngine:
 
         Logic per filled mapping whose signal is still active/hit:
           1. Fetch the current stop_loss from the DB signal row.
-          2. Compute what the MT5-space SL should be (apply feed offset for
-             indices/crypto, plus spread adjustment matching the original
-             direction).
-          3. Compare to last_known_mt5_sl stored in orders.db.
-          4. If different beyond one pip, call mt5_api.modify_position_sl()
-             and update last_known_mt5_sl in local DB.
+          2. Compare the DB stop_loss to db_stop_loss stored in orders.db.
+             Only act when the DB SL itself changed — spread fluctuations are
+             intentionally ignored to prevent constant SL writes that would
+             fight and defeat the trailing stop.
+          3. If the DB SL changed, compute the MT5-space SL (apply feed offset
+             for indices/crypto, plus spread adjustment matching the direction).
+          4. Call mt5_api.modify_position_sl() and update local DB.
         """
         active_signals = await supabase_db.fetch_active_signals(self.pool)
         if not active_signals:
@@ -1174,7 +1277,37 @@ class SyncEngine:
             direction  = signal["direction"]
             db_sl      = signal["stop_loss"]
 
-            # --- Translate DB stop_loss into MT5 price space ---
+            # --- Only act when the DB stop_loss itself has changed. ---
+            # We compare the current DB SL against the db_stop_loss we stored
+            # at placement (or last update).  Spread fluctuations are intentionally
+            # ignored here — they produce sub-pip noise on every tick and would
+            # cause constant SL modifications that fight the trailing stop.
+            stored_db_sl = mapping.get("db_stop_loss")
+
+            last_known = mapping.get("last_known_mt5_sl")
+
+            # On first run (no last_known yet), seed from MT5 and record the
+            # current db_sl so we have a baseline for future change detection.
+            if last_known is None:
+                positions = mt5_api.get_open_positions()
+                live_pos  = next((p for p in positions if p["ticket"] == ticket), None)
+                if live_pos is None:
+                    continue
+                current_mt5_sl = live_pos.get("sl", 0.0) or 0.0
+                local_db.update_known_mt5_sl(ticket, db_sl, current_mt5_sl)
+                continue  # Seed only; evaluate on the next cycle.
+
+            # If the DB SL hasn't changed since we last acted, nothing to do.
+            pip_size = mt5_api.pips_to_price(1.0, symbol)
+            if pip_size <= 0:
+                pip_size = 0.00001
+
+            if stored_db_sl is not None and abs(db_sl - stored_db_sl) < pip_size:
+                continue  # DB SL unchanged — skip, no matter what the spread does.
+            # If stored_db_sl is None (old mapping predating the db_stop_loss column),
+            # fall through and apply once so we establish the baseline.
+
+            # DB SL genuinely changed — translate into MT5 price space and apply.
             offset = 0.0
             if needs_feed_offset(instrument):
                 computed = await get_feed_offset(
@@ -1193,30 +1326,10 @@ class SyncEngine:
             else:
                 mt5_sl = db_sl + offset + spread
 
-            last_known = mapping.get("last_known_mt5_sl")
-
-            # On first run after migration, seed last_known_mt5_sl from MT5
-            # so we only update on a genuine future change.
-            if last_known is None:
-                positions = mt5_api.get_open_positions()
-                live_pos  = next((p for p in positions if p["ticket"] == ticket), None)
-                if live_pos is None:
-                    continue
-                current_mt5_sl = live_pos.get("sl", 0.0) or 0.0
-                local_db.update_known_mt5_sl(ticket, db_sl, current_mt5_sl)
-                continue  # Seed only; evaluate on the next cycle.
-
-            pip_size = mt5_api.pips_to_price(1.0, symbol)
-            if pip_size <= 0:
-                pip_size = 0.00001
-
-            if abs(mt5_sl - last_known) < pip_size:
-                continue
-
             logger.info(
                 f"SL change detected for signal {signal_id}, ticket {ticket} "
-                f"({symbol}): last_known_mt5_sl={last_known:.5f} -> new_mt5_sl={mt5_sl:.5f} "
-                f"(db_sl={db_sl:.5f}, offset={offset:+.5f})"
+                f"({symbol}): db_sl changed {stored_db_sl} -> {db_sl:.5f}, "
+                f"applying mt5_sl={mt5_sl:.5f} (offset={offset:+.5f})"
             )
 
             success = mt5_api.modify_position_sl(ticket, mt5_sl, symbol)

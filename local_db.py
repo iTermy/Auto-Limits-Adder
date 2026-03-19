@@ -506,6 +506,32 @@ def get_signal_ids_with_filled_positions(db_path: str = DB_PATH) -> set[int]:
     return {r["signal_id"] for r in rows}
 
 
+def purge_all_pending_on_startup(db_path: str = DB_PATH) -> tuple[int, int]:
+    """
+    Called once on startup to give the bot a clean slate for pending orders.
+
+    Deletes every row in order_mappings with status='pending' or
+    status='cancelled', and clears the entire deferred_limits table.
+    Rows with status='filled' (open positions managed by the TP engine)
+    are intentionally left untouched.
+
+    Returns (orders_deleted, deferred_deleted).
+    """
+    with get_connection(db_path) as conn:
+        cur1 = conn.execute(
+            "DELETE FROM order_mappings WHERE status IN ('pending', 'cancelled', 'error')"
+        )
+        cur2 = conn.execute("DELETE FROM deferred_limits")
+        conn.commit()
+    orders_deleted   = cur1.rowcount
+    deferred_deleted = cur2.rowcount
+    logger.debug(
+        f"Startup purge: removed {orders_deleted} pending/cancelled order mapping(s) "
+        f"and {deferred_deleted} deferred limit(s)."
+    )
+    return orders_deleted, deferred_deleted
+
+
 def delete_cancelled_for_limit_ids(limit_ids: list[int], db_path: str = DB_PATH) -> int:
     """
     Permanently delete 'cancelled' rows for the given limit_ids so the sync

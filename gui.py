@@ -6,28 +6,16 @@ before the main settings window. Settings are persisted to config.json and
 the .env file. The user can launch the bot directly from the GUI.
 """
 
+import asyncio
 import json
+import logging
 import os
-import subprocess
+import queue
 import sys
 import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, scrolledtext, ttk
-
-# ─────────────────────────────────────────────
-# Bot-mode: when compiled into a single exe,
-# re-launching with --bot runs main() directly
-# instead of opening the GUI.
-# ─────────────────────────────────────────────
-if "--bot" in sys.argv:
-    # Run the bot entry point and exit — no GUI
-    import asyncio
-    # Ensure cwd is the exe's directory so config.json / orders.db resolve correctly
-    os.chdir(Path(sys.executable).parent if getattr(sys, "frozen", False) or "__compiled__" in dir(sys) else Path(__file__).parent)
-    from main import main as _bot_main
-    asyncio.run(_bot_main())
-    sys.exit(0)
 
 # ─────────────────────────────────────────────
 # Paths
@@ -651,6 +639,25 @@ class TPClassEditor(tk.Frame):
 
 
 # ─────────────────────────────────────────────
+# Queue-based log handler (bot thread → GUI)
+# ─────────────────────────────────────────────
+
+class _QueueLogHandler(logging.Handler):
+    """Routes log records from the bot thread into a queue the GUI drains."""
+    def __init__(self, log_queue: queue.Queue):
+        super().__init__()
+        self._q = log_queue
+
+    def emit(self, record: logging.LogRecord):
+        try:
+            line  = self.format(record)
+            level = record.levelname  # "INFO", "WARNING", "ERROR", …
+            self._q.put((level, line))
+        except Exception:
+            self.handleError(record)
+
+
+# ─────────────────────────────────────────────
 # Log panel
 # ─────────────────────────────────────────────
 
@@ -748,9 +755,10 @@ class SettingsWindow(tk.Tk):
         self.configure(bg=BG)
         self.minsize(720, 620)
         self.geometry("780x720")
-        self._bot_proc = None
-        self._log_thread = None
-        self._running = False
+        self._bot_thread  = None   # Thread running the bot asyncio loop
+        self._bot_stop    = None   # threading.Event — set to request shutdown
+        self._log_queue   = queue.Queue()  # bot log lines → GUI
+        self._running     = False
 
         self._cfg = load_config()
         self._env = load_env()
@@ -1112,38 +1120,58 @@ class SettingsWindow(tk.Tk):
 
         self._save()
 
-        # When compiled with Nuitka, sys.executable is the gui.exe itself.
-        # Re-launch it with --bot so the single exe runs in bot mode.
-        _is_compiled = getattr(sys, "frozen", False) or "__compiled__" in dir(sys)
-        if _is_compiled:
-            _cmd = [sys.executable, "--bot"]
-        else:
-            _cmd = [sys.executable, str(BASE_DIR / "main.py")]
+        self._bot_stop = threading.Event()
+        stop_event    = self._bot_stop
+        log_queue     = self._log_queue
 
-        try:
-            self._bot_proc = subprocess.Popen(
-                _cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, cwd=str(BASE_DIR), encoding="utf-8", errors="replace",
-            )
-        except FileNotFoundError as exc:
-            messagebox.showerror("Launch Error", f"Failed to start bot:\n{exc}", parent=self)
-            return
+        def _run_bot():
+            """Run main() in its own asyncio event loop on a background thread."""
+            # Set up a logging handler that feeds lines into the GUI queue
+            # instead of printing to stdout (which has no console in --noconsole builds).
+            handler = _QueueLogHandler(log_queue)
+            handler.setFormatter(logging.Formatter(
+                "%(asctime)s  %(levelname)-8s  %(name)s — %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+            ))
+            root_logger = logging.getLogger()
+            root_logger.addHandler(handler)
+
+            try:
+                from main import main as _bot_main
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                # Inject the stop event into main's shutdown mechanism.
+                import main as _main_mod
+                _main_mod._shutdown = False
+                _main_mod._stop_event = stop_event
+
+                try:
+                    loop.run_until_complete(_bot_main())
+                finally:
+                    loop.close()
+            except Exception as exc:
+                log_queue.put(("ERROR", f"Bot crashed: {exc}"))
+            finally:
+                root_logger.removeHandler(handler)
+                log_queue.put(("__EXIT__", ""))
+
+        self._bot_thread = threading.Thread(target=_run_bot, daemon=True, name="BotThread")
+        self._bot_thread.start()
+
         self._running = True
         self._start_btn.config(text="■  Stop Bot", bg=RED)
         self._start_btn.bind("<Enter>", lambda e: self._start_btn.config(bg=RED_HO))
         self._start_btn.bind("<Leave>", lambda e: self._start_btn.config(bg=RED))
         self._status_lbl.config(text="● Running", fg=GREEN)
-        self._log_panel.append("Bot started. [build v2 - BASE_DIR fix]", "INFO")
+        self._log_panel.append("Bot started.", "INFO")
         self._nb.select(4)
 
-        self._log_thread = threading.Thread(target=self._stream_logs, daemon=True)
-        self._log_thread.start()
-        self.after(500, self._poll_bot_status)
+        self.after(100, self._drain_log_queue)
 
     def _stop_bot(self):
-        if self._bot_proc and self._bot_proc.poll() is None:
-            self._bot_proc.terminate()
+        if self._bot_stop and not self._bot_stop.is_set():
+            self._bot_stop.set()
             self._log_panel.append("Bot stop requested.", "WARNING")
         self._running = False
         self._start_btn.config(text="▶  Start Bot", bg=ACCENT)
@@ -1151,28 +1179,20 @@ class SettingsWindow(tk.Tk):
         self._start_btn.bind("<Leave>", lambda e: self._start_btn.config(bg=ACCENT))
         self._status_lbl.config(text="● Stopped", fg=FG_DIM)
 
-    def _stream_logs(self):
-        if not self._bot_proc:
-            return
-        for line in self._bot_proc.stdout:
-            line = line.rstrip()
-            ll = line.lower()
-            level = ("CRITICAL" if "critical" in ll else
-                     "ERROR"    if "error"    in ll else
-                     "WARNING"  if "warning"  in ll else
-                     "DEBUG"    if "debug"    in ll else "INFO")
-            self.after(0, lambda ln=line, lv=level: self._log_panel.append(ln, lv))
-
-    def _poll_bot_status(self):
-        if not self._running:
-            return
-        if self._bot_proc and self._bot_proc.poll() is not None:
-            rc = self._bot_proc.returncode
-            self._log_panel.append(f"Bot exited (code {rc}).",
-                                   "WARNING" if rc else "INFO")
-            self._stop_bot()
-            return
-        self.after(1000, self._poll_bot_status)
+    def _drain_log_queue(self):
+        """Poll the log queue and write any pending lines to the log panel."""
+        try:
+            while True:
+                level, line = self._log_queue.get_nowait()
+                if level == "__EXIT__":
+                    self._log_panel.append("Bot exited.", "INFO")
+                    self._stop_bot()
+                    return
+                self._log_panel.append(line, level)
+        except queue.Empty:
+            pass
+        if self._running:
+            self.after(100, self._drain_log_queue)
 
     # ──────── Utilities ────────
 

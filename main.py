@@ -87,7 +87,8 @@ def load_config(path: str = "config.json") -> dict:
 # Graceful shutdown
 # ---------------------------------------------------------------------------
 
-_shutdown = False
+_shutdown   = False
+_stop_event = None   # optionally set to a threading.Event by the GUI launcher
 
 def _handle_signal(sig, frame):
     global _shutdown
@@ -168,12 +169,19 @@ async def main() -> None:
 
     logger.info(f"Starting main loop (poll every {poll_interval}s). Press Ctrl+C to stop.")
 
+    def _should_stop() -> bool:
+        if _shutdown:
+            return True
+        if _stop_event is not None and _stop_event.is_set():
+            return True
+        return False
+
     try:
-        while not _shutdown:
+        while not _should_stop():
             await sync.run_cycle()
             # Sleep in small increments so shutdown signal is caught quickly
             for _ in range(poll_interval * 10):
-                if _shutdown:
+                if _should_stop():
                     break
                 await asyncio.sleep(0.1)
     finally:
