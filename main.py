@@ -17,14 +17,18 @@ Requirements:
 import subprocess
 import sys
 
-# Auto-install required packages before anything else imports them
-_REQUIRED = ["asyncpg", "MetaTrader5"]
-for _pkg in _REQUIRED:
-    try:
-        __import__(_pkg.lower().replace("-", "_"))
-    except ImportError:
-        print(f"Installing {_pkg}...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", _pkg, "--quiet"])
+# Auto-install required packages before anything else imports them.
+# Skipped when frozen (PyInstaller/Nuitka): sys.executable is the compiled exe
+# itself, so calling it with "-m pip" would re-launch the GUI as a second window.
+# All required packages must be bundled at build time in compiled distributions.
+if not getattr(sys, "frozen", False) and "__compiled__" not in dir(sys):
+    _REQUIRED = ["asyncpg", "MetaTrader5"]
+    for _pkg in _REQUIRED:
+        try:
+            __import__(_pkg.lower().replace("-", "_"))
+        except ImportError:
+            print(f"Installing {_pkg}...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", _pkg, "--quiet"])
 
 import asyncio
 import json
@@ -95,8 +99,10 @@ def _handle_signal(sig, frame):
     logger.info(f"Received signal {sig} — initiating graceful shutdown.")
     _shutdown = True
 
-signal.signal(signal.SIGINT,  _handle_signal)
-signal.signal(signal.SIGTERM, _handle_signal)
+import threading as _threading
+if _threading.current_thread() is _threading.main_thread():
+    signal.signal(signal.SIGINT,  _handle_signal)
+    signal.signal(signal.SIGTERM, _handle_signal)
 
 
 # ---------------------------------------------------------------------------

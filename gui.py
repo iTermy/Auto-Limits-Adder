@@ -1231,6 +1231,8 @@ def _safe_int(val: str, default: int) -> int:
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
     app = SettingsWindow()
     app.protocol("WM_DELETE_WINDOW", app.on_close)
     app.mainloop()
