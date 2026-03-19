@@ -759,6 +759,7 @@ class SettingsWindow(tk.Tk):
         self._bot_stop    = None   # threading.Event — set to request shutdown
         self._log_queue   = queue.Queue()  # bot log lines → GUI
         self._running     = False
+        self._drain_started = False  # ensures only one drain loop runs at a time
 
         self._cfg = load_config()
         self._env = load_env()
@@ -767,6 +768,7 @@ class SettingsWindow(tk.Tk):
         self._load_values()
         self._check_license_on_start()
         self._center()
+        self.after(100, self._drain_log_queue)  # permanent drain loop
 
     # ──────── Layout ────────
 
@@ -1118,11 +1120,27 @@ class SettingsWindow(tk.Tk):
             self._nb.select(0)
             return
 
+        # If a previous bot thread is still winding down, wait briefly for it
+        # before launching a new one (avoids module-state collisions).
+        if self._bot_thread is not None and self._bot_thread.is_alive():
+            self._log_panel.append("Waiting for previous bot instance to stop...", "WARNING")
+            self.after(500, self._start_bot)
+            return
+
         self._save()
 
         self._bot_stop = threading.Event()
         stop_event    = self._bot_stop
         log_queue     = self._log_queue
+
+        # Reset main module's shutdown flag *before* spawning the thread so the
+        # new asyncio loop sees a clean state from the very first iteration.
+        try:
+            import main as _main_mod
+            _main_mod._shutdown   = False
+            _main_mod._stop_event = stop_event
+        except Exception:
+            pass  # main not yet imported on very first launch -- that's fine
 
         def _run_bot():
             """Run main() in its own asyncio event loop on a background thread."""
@@ -1130,7 +1148,7 @@ class SettingsWindow(tk.Tk):
             # instead of printing to stdout (which has no console in --noconsole builds).
             handler = _QueueLogHandler(log_queue)
             handler.setFormatter(logging.Formatter(
-                "%(asctime)s  %(levelname)-8s  %(name)s — %(message)s",
+                "%(asctime)s  %(levelname)-8s  %(name)s -- %(message)s",
                 datefmt="%Y-%m-%d %H:%M:%S",
             ))
             root_logger = logging.getLogger()
@@ -1141,15 +1159,16 @@ class SettingsWindow(tk.Tk):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
 
-                # Inject the stop event into main's shutdown mechanism.
+                # Ensure the stop event is injected even if main was just imported.
                 import main as _main_mod
-                _main_mod._shutdown = False
+                _main_mod._shutdown   = False
                 _main_mod._stop_event = stop_event
 
                 try:
                     loop.run_until_complete(_bot_main())
                 finally:
                     loop.close()
+                    asyncio.set_event_loop(None)
             except Exception as exc:
                 log_queue.put(("ERROR", f"Bot crashed: {exc}"))
             finally:
@@ -1166,8 +1185,6 @@ class SettingsWindow(tk.Tk):
         self._status_lbl.config(text="● Running", fg=GREEN)
         self._log_panel.append("Bot started.", "INFO")
         self._nb.select(4)
-
-        self.after(100, self._drain_log_queue)
 
     def _stop_bot(self):
         if self._bot_stop and not self._bot_stop.is_set():
@@ -1187,12 +1204,14 @@ class SettingsWindow(tk.Tk):
                 if level == "__EXIT__":
                     self._log_panel.append("Bot exited.", "INFO")
                     self._stop_bot()
-                    return
+                    # Keep the drain loop alive so it is ready when the bot
+                    # is started again -- do not return here.
+                    break
                 self._log_panel.append(line, level)
         except queue.Empty:
             pass
-        if self._running:
-            self.after(100, self._drain_log_queue)
+        # Always reschedule so the drain loop survives stop/start cycles.
+        self.after(100, self._drain_log_queue)
 
     # ──────── Utilities ────────
 

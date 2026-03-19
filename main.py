@@ -124,7 +124,9 @@ async def main() -> None:
     connected = mt5_api.connect()
     if not connected:
         logger.critical("Failed to connect to MT5. Exiting.")
-        sys.exit(1)
+        if _is_compiled or __name__ == "__main__":
+            sys.exit(1)
+        raise RuntimeError("Failed to connect to MT5.")
 
     # Connect to Supabase
     logger.info("Connecting to Supabase...")
@@ -143,7 +145,9 @@ async def main() -> None:
         )
         await supabase_db.close_pool(pool)
         mt5_api.disconnect()
-        sys.exit(1)
+        if _is_compiled or __name__ == "__main__":
+            sys.exit(1)
+        raise RuntimeError("No license key configured.")
 
     mt5_account = str(mt5_api.get_account_number())
     logger.info(f"MT5 account: {mt5_account}")
@@ -152,7 +156,9 @@ async def main() -> None:
         logger.critical("License validation failed — exiting.")
         await supabase_db.close_pool(pool)
         mt5_api.disconnect()
-        sys.exit(1)
+        if _is_compiled or __name__ == "__main__":
+            sys.exit(1)
+        raise RuntimeError("License validation failed.")
 
     heartbeat_task = start_heartbeat(pool, license_key, mt5_account)
     # -----------------------------------------------------------------------
